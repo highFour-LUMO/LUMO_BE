@@ -1,5 +1,5 @@
 ---
-name: 이슈 생성 템플릿
+name: Issue_template
 about: 이거 쓰슈
 title: ''
 labels: ''
