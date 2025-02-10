@@ -14,6 +14,7 @@ import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.diary.dto.DiaryCreateReqDto;
 import com.highFour.LUMO.diary.dto.DiaryListResDto;
+import com.highFour.LUMO.diary.dto.DiarySearchReqDto;
 import com.highFour.LUMO.diary.entity.Category;
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.entity.DiaryHashtagRelation;
@@ -111,8 +112,22 @@ public class DiaryService {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
 		List<DiaryImg> imgs = diaryImgRepository.findByDiaryId(diaryId);
-		return DiaryListResDto.fromEntity(diary, imgs);
+		return DiaryListResDto.fromEntity(diary);
 	}
 
 	// 일기 목록 조회
+
+	// 제목에서 검색
+	public List<DiaryListResDto> searchByKeyword(DiarySearchReqDto dto) {
+		List<Diary> diaryList = null;
+
+		if (dto.searchType().equals("제목")) {
+			diaryList = diaryRepository.findByTypeAndTitleContainingIgnoreCase(dto.type(), dto.keyword());
+		}else if (dto.searchType().equals("내용")) {
+			diaryList = diaryRepository.findByTypeAndContentsContainingIgnoreCase(dto.type(), dto.keyword());
+		}
+		return diaryList.stream()
+			.map(DiaryListResDto::fromEntity)
+			.collect(Collectors.toList());
+	}
 }
