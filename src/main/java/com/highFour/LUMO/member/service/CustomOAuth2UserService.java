@@ -1,11 +1,11 @@
 package com.highFour.LUMO.member.service;
 
 
-import com.highFour.Hand2Hand.domain.member.entity.Member;
-import com.highFour.Hand2Hand.domain.member.repository.MemberRepository;
+
+import com.highFour.LUMO.member.entity.Member;
+import com.highFour.LUMO.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -54,20 +54,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             String uuidPass = String.valueOf(UUID.randomUUID());
             member.updatePass(uuidPass);
         }
-        if (member.getAddress() == null){
-            String address = "임시주소입니다. 주소를 변경해주세요";
-            member.updateAddress(address);
-        }
-        if (member.getPhone() == null){
-            String phone = "핸드폰 번호를 입력해주세요";
-            member.updatePhone(phone);
-        }
         // 사업자가 있으면 필요 X
 
         memberRepository.save(member);
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRole().toString())),
-                attributes.getAttributes(), attributes.getNameAttributeKey());
+                Collections.emptySet(),
+                attributes.getAttributes(),
+                attributes.getNameAttributeKey()
+        );
     }
 
     private Member saveOrUpdate(OAuthAttributes attributes) {

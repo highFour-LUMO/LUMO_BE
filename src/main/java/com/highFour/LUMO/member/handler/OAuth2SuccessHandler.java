@@ -1,9 +1,9 @@
 package com.highFour.LUMO.member.handler;
 
 
-import com.highFour.Hand2Hand.common.config.JwtTokenProvider;
-import com.highFour.Hand2Hand.domain.member.entity.Member;
-import com.highFour.Hand2Hand.domain.member.repository.MemberRepository;
+import com.highFour.LUMO.common.config.JwtTokenProvider;
+import com.highFour.LUMO.member.entity.Member;
+import com.highFour.LUMO.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -55,7 +56,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Long getMemberId = member.getId();
 
-        String token = jwtTokenprovider.kakaoToken(memberEmail, getMemberId,member.getRole().toString());
+        String token = jwtTokenprovider.kakaoToken(memberEmail, getMemberId);
 
         // 리다이렉트 URL 설정 (아래 먼저는 로컬호스트 환경에서, 두번째는 프론트 환경에서)
         String targetUrl = null;

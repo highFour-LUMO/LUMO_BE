@@ -1,8 +1,8 @@
 package com.highFour.LUMO.member.service;
 
 
-import com.highFour.Hand2Hand.domain.member.entity.Member;
-import com.highFour.Hand2Hand.domain.member.entity.Role;
+
+import com.highFour.LUMO.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -81,7 +81,6 @@ public class OAuthAttributes {
         return Member.builder()
                 .name(name)
                 .email(email)
-                .role(Role.USER)
                 .build();
     }
 }

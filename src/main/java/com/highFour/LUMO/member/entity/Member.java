@@ -1,6 +1,7 @@
 package com.highFour.LUMO.member.entity;
 
-import com.highFour.Hand2Hand.common.domain.BaseTimeEntity;
+
+import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -33,43 +34,11 @@ public class Member extends BaseTimeEntity {
     private String email;
 
     @NotNull
-    private Address address;
+    private int point;
 
     private String profileImgUrl;
-
-    @ColumnDefault("0")
-    private int reportCnt;
-
-    @NotNull
-    private String phone;
-
-    @ColumnDefault("50")
-    private int score;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     @Builder.Default
     private boolean isVerified = false;
 
-    public Member updateName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public Member updatePass(String uuid) {
-        this.password = uuid;
-        return this;
-    }
-
-    public Member updateAddress(String temp) {
-        this.address = new Address(temp, "", "");
-        return this;
-    }
-
-    public Member updatePhone(String phone) {
-        this.phone = phone;
-        return this;
-    }
 }
