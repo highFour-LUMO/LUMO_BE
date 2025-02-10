@@ -14,20 +14,16 @@ import lombok.Builder;
 public record DiaryListResDto(
 	String title,
 	String contents,
-	List<String> imgUrls,
 	String member,
 	String emotion,
 	String category,
 	Visibility visibility
 ) {
 
-	public static DiaryListResDto fromEntity(Diary diary,  List<DiaryImg> diaryImgs) {
-		List<String> imgUrls = diaryImgs.stream().map(DiaryImg::getImgUrl).toList();
-
+	public static DiaryListResDto fromEntity(Diary diary) {
 		return DiaryListResDto.builder()
 			.title(diary.getTitle())
 			.contents(diary.getContents())
-			.imgUrls(imgUrls)
 			.member(null)
 			.emotion(diary.getEmotion().getLabel())
 			.category(diary.getCategory().getLabel())

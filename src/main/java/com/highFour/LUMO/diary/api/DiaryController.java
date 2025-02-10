@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.highFour.LUMO.diary.dto.DiaryCreateReqDto;
 import com.highFour.LUMO.diary.dto.DiaryListResDto;
+import com.highFour.LUMO.diary.dto.DiarySearchReqDto;
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.service.DiaryService;
 
@@ -40,5 +41,12 @@ public class DiaryController {
 	}
 
 	// 	일기 목록 조회
+
+	// 검색어로 검색
+	@GetMapping("/search")
+	public ResponseEntity<?>  searchByKeyword(@RequestBody DiarySearchReqDto dto) {
+		List<DiaryListResDto> diaryList = diaryService.searchByKeyword(dto);
+		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
+	}
 
 }
