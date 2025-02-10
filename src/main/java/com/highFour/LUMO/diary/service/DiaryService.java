@@ -5,6 +5,7 @@ import static com.highFour.LUMO.common.exceptionType.DiaryExceptionType.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,29 +16,40 @@ import com.highFour.LUMO.diary.dto.DiaryCreateReqDto;
 import com.highFour.LUMO.diary.dto.DiaryListResDto;
 import com.highFour.LUMO.diary.entity.Category;
 import com.highFour.LUMO.diary.entity.Diary;
+import com.highFour.LUMO.diary.entity.DiaryHashtagRelation;
 import com.highFour.LUMO.diary.entity.DiaryImg;
 import com.highFour.LUMO.diary.entity.DiaryType;
 import com.highFour.LUMO.diary.entity.Emotion;
+import com.highFour.LUMO.diary.entity.Hashtag;
 import com.highFour.LUMO.diary.repository.CategoryRepository;
+import com.highFour.LUMO.diary.repository.DiaryHashtagRelationRepository;
 import com.highFour.LUMO.diary.repository.DiaryImgRepository;
 import com.highFour.LUMO.diary.repository.DiaryRepository;
 import com.highFour.LUMO.diary.repository.EmotionRepository;
+import com.highFour.LUMO.diary.repository.HashtagRepository;
 
 @Service
 public class DiaryService {
 	private final EmotionRepository emotionRepository;
 	private final CategoryRepository categoryRepository;
+	private final HashtagRepository hashtagRepository;
 	private final DiaryImgRepository diaryImgRepository;
 	private final DiaryRepository diaryRepository;
+	private final DiaryHashtagRelationRepository diaryHashtagRelationRepository;
 
 	public DiaryService(EmotionRepository emotionRepository, CategoryRepository categoryRepository,
-		DiaryImgRepository diaryImgRepository, DiaryRepository diaryRepository) {
+		HashtagRepository hashtagRepository,
+		DiaryImgRepository diaryImgRepository, DiaryRepository diaryRepository,
+		DiaryHashtagRelationRepository diaryHashtagRelationRepository) {
 		this.emotionRepository = emotionRepository;
 		this.categoryRepository = categoryRepository;
+		this.hashtagRepository = hashtagRepository;
 		this.diaryImgRepository = diaryImgRepository;
 		this.diaryRepository = diaryRepository;
+		this.diaryHashtagRelationRepository = diaryHashtagRelationRepository;
 	}
 
+	// 일기 작성
 	@Transactional
 	public Diary createDiary(DiaryCreateReqDto reqDto) {
 		// 입력 null에 대한 예외 처리 필요
@@ -51,10 +63,10 @@ public class DiaryService {
 			reqDto.type(), startOfDay, endOfDay
 		);
 		if (diaryExists) {
-
 			throw new BaseCustomException(DIARY_ALREADY_EXIST);
 		}
 
+		// 일기 or 감사일기에 따른 감정, 카테고리 저장
 		Emotion emotion = null;
 		Category category = null;
 
@@ -70,8 +82,14 @@ public class DiaryService {
 				.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
 		}
 
+
 		Diary diary = reqDto.toEntity(emotion, category);
+		List<Hashtag> hashtags = toHashtags(reqDto.hashtags());
+		List<DiaryHashtagRelation> diaryHashtagRelations = reqDto.toDiaryHashtagRelation(diary, hashtags);
+
 		diaryRepository.save(diary);
+		hashtagRepository.saveAll(hashtags);
+		diaryHashtagRelationRepository.saveAll(diaryHashtagRelations);
 
 		List<DiaryImg> diaryImgs = reqDto.toDiaryImg(diary);
 		diaryImgRepository.saveAll(diaryImgs);
@@ -79,10 +97,22 @@ public class DiaryService {
 		return diary;
 	}
 
+	// 해시 태그 중복 확인
+	public List<Hashtag> toHashtags(List<String> hashtags) {
+		return hashtags.stream()
+			.distinct()
+			.map(name -> hashtagRepository.findByName(name)
+				.orElseGet(() -> Hashtag.builder().name(name).build()))
+			.collect(Collectors.toList());
+	}
+
+	// 일기 상세 조회
 	public DiaryListResDto getDiaryByDiaryId(Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
 		List<DiaryImg> imgs = diaryImgRepository.findByDiaryId(diaryId);
 		return DiaryListResDto.fromEntity(diary, imgs);
 	}
+
+	// 일기 목록 조회
 }

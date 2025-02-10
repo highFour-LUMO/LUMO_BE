@@ -32,10 +32,13 @@ public class DiaryController {
 		return new ResponseEntity<>(diary, HttpStatus.CREATED);
 	}
 
-	// 일기 조회
+	// 일기 상세 조회
 	@GetMapping("/{diaryId}")
 	public ResponseEntity<?> getReviewList(@PathVariable(name = "diaryId") Long diaryId) {
 		DiaryListResDto diaryList = diaryService.getDiaryByDiaryId(diaryId);
 		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
 	}
+
+	// 	일기 목록 조회
+
 }
