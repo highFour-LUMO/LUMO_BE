@@ -33,17 +33,13 @@ public class Diary extends BaseTimeEntity {
 	@JoinColumn(name = "category_id")
 	private Category category;
 
-	// private Long member_id;
+	private Long memberId;
 
 	private DiaryType type;
 
 	private String title;
 
 	private String contents;
-
-	// private Long emotion_id;
-
-	// private Long category_id;
 
 	private Visibility visibility;
 }
