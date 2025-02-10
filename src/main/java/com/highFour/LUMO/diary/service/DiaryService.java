@@ -2,6 +2,8 @@ package com.highFour.LUMO.diary.service;
 
 import static com.highFour.LUMO.common.exceptionType.DiaryExceptionType.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -38,8 +40,21 @@ public class DiaryService {
 	public Diary createDiary(DiaryCreateReqDto reqDto) {
 		// 입력 null에 대한 예외 처리 필요
 
-		Emotion emotion = new Emotion();
-		Category category = new Category();
+		// 오늘의 일기가 이미 존재하는지 확인
+		LocalDate today = LocalDate.now();
+		LocalDateTime startOfDay = today.atStartOfDay();
+		LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+		boolean diaryExists = diaryRepository.existsByTypeAndCreatedAtBetween(
+			reqDto.type(), startOfDay, endOfDay
+		);
+		if (diaryExists) {
+
+			throw new BaseCustomException(DIARY_ALREADY_EXIST);
+		}
+
+		Emotion emotion = null;
+		Category category = null;
 
 		if (reqDto.type() == DiaryType.DIARY) {
 			emotion = emotionRepository.findById(reqDto.emotionId())
