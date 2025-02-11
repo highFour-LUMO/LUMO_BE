@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +56,7 @@ public class DiaryService {
 	@Transactional
 	public Diary createDiary(DiaryCreateReqDto reqDto) {
 		// 입력 null에 대한 예외 처리 필요
+		// 로그인한 사용자로만 일기 조회 처리 필요
 
 		// 오늘의 일기가 이미 존재하는지 확인
 		LocalDate today = LocalDate.now();
@@ -69,28 +71,18 @@ public class DiaryService {
 		}
 
 		// 일기 or 감사일기에 따른 감정, 카테고리 저장
-		Emotion emotion = null;
-		Category category = null;
-
-		if (reqDto.type() == DiaryType.DIARY) {
-			emotion = emotionRepository.findById(reqDto.emotionId())
-				.orElseThrow(() -> new BaseCustomException(EMOTION_NOT_FOUND));
-			category = categoryRepository.findById(1L)
-				.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
-		} else if (reqDto.type() == DiaryType.GRATITUDE) {
-			emotion = emotionRepository.findById(1L)
-				.orElseThrow(() -> new BaseCustomException(EMOTION_NOT_FOUND));
-			category = categoryRepository.findById(reqDto.categoryId())
-				.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
-		}
-
+		Emotion emotion = emotionRepository.findById(reqDto.type() == DiaryType.DIARY ? reqDto.emotionId() : 1L)
+			.orElseThrow(() -> new BaseCustomException(EMOTION_NOT_FOUND));
+		Category category = categoryRepository.findById(reqDto.type() == DiaryType.GRATITUDE ? reqDto.categoryId() : 1L)
+			.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
 
 		Diary diary = reqDto.toEntity(emotion, category);
-		List<Hashtag> hashtags = toHashtags(reqDto.hashtags());
-		List<DiaryHashtagRelation> diaryHashtagRelations = reqDto.toDiaryHashtagRelation(diary, hashtags);
-
 		diaryRepository.save(diary);
+
+		List<Hashtag> hashtags = toHashtags(reqDto.hashtags());
 		hashtagRepository.saveAll(hashtags);
+
+		List<DiaryHashtagRelation> diaryHashtagRelations = reqDto.toDiaryHashtagRelation(diary, hashtags);
 		diaryHashtagRelationRepository.saveAll(diaryHashtagRelations);
 
 		List<DiaryImg> diaryImgs = reqDto.toDiaryImg(diary);
@@ -120,6 +112,12 @@ public class DiaryService {
 	}
 
 	// 일기 목록 조회
+	public List<DiaryListResDto> getDiaryList(DiaryType type) {
+		List<Diary> diaryList = diaryRepository.findByType(type);
+		return diaryList.stream()
+			.map(DiaryListResDto::fromEntity)
+			.collect(Collectors.toList());
+	}
 
 	// 제목에서 검색
 	public List<DiaryListResDto> searchByKeyword(DiarySearchReqDto dto) {

@@ -15,6 +15,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	// 오늘의 일기 존재여부 확인
 	boolean existsByTypeAndCreatedAtBetween(DiaryType type, LocalDateTime start, LocalDateTime end);
 
+	// 타입별 리스트 검색
+	List<Diary> findByType(DiaryType type);
+
 	// 타입별 제목에서 검색
 	List<Diary> findByTypeAndTitleContainingIgnoreCase(DiaryType type, String title);
 
