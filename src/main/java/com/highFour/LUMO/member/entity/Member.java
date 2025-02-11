@@ -1,6 +1,5 @@
 package com.highFour.LUMO.member.entity;
 
-
 import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @NoArgsConstructor
@@ -34,11 +32,20 @@ public class Member extends BaseTimeEntity {
     private String email;
 
     @NotNull
-    private int point;
 
     private String profileImgUrl;
 
     @Builder.Default
     private boolean isVerified = false;
 
+
+    public Member updateName(String temp) {
+        this.name = temp;
+        return this;
+    }
+
+    public Member updatePass(String uuidPass) {
+        this.password = uuidPass;
+        return this;
+    }
 }
