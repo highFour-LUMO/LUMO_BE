@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.diary.dto.DiaryCreateReqDto;
+import com.highFour.LUMO.diary.dto.DiaryDetResDto;
 import com.highFour.LUMO.diary.dto.DiaryListResDto;
 import com.highFour.LUMO.diary.dto.DiarySearchReqDto;
 import com.highFour.LUMO.diary.entity.Category;
@@ -108,11 +109,14 @@ public class DiaryService {
 	}
 
 	// 일기 상세 조회
-	public DiaryListResDto getDiaryByDiaryId(Long diaryId) {
+	public DiaryDetResDto getDiaryByDiaryId(Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
-		List<DiaryImg> imgs = diaryImgRepository.findByDiaryId(diaryId);
-		return DiaryListResDto.fromEntity(diary);
+
+		List<DiaryImg> urls = diaryImgRepository.findByDiaryId(diaryId);
+		List<String> imgs = DiaryDetResDto.fromDiaryImg(urls);
+
+		return DiaryDetResDto.fromEntity(diary, imgs);
 	}
 
 	// 일기 목록 조회
