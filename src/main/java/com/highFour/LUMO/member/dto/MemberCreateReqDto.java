@@ -4,6 +4,7 @@ package com.highFour.LUMO.member.dto;
 import com.highFour.LUMO.member.entity.Member;
 import lombok.Builder;
 
+
 @Builder
 public record MemberCreateReqDto(
         String name,
@@ -13,7 +14,7 @@ public record MemberCreateReqDto(
         String phone,
         String profileImgUrl) {
 
-    public static MemberCreateReqDto fromEntity(Member member){
+    public static MemberCreateReqDto toEntity(Member member){
         return MemberCreateReqDto.builder()
                 .name(member.getName())
                 .nickname(member.getNickname())
