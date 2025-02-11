@@ -134,4 +134,24 @@ public class DiaryService {
 			.map(DiaryListResDto::fromEntity)
 			.collect(Collectors.toList());
 	}
+
+	// 일기 삭제 시 임시보관함에 저장
+	public void deleteDiary(Long diaryId) {
+		Diary diary = diaryRepository.findById(diaryId)
+			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
+
+		// 임시보관함에 저장
+		diary.softDeleteDiary();
+	}
+
+	// 임시 보관 30일 이후 영구 삭제
+	@Scheduled(cron = "0 0 0 * * ?")
+	@Transactional
+	public void deleteExpiredDiaries() {
+		LocalDateTime threshold = LocalDateTime.now().minusDays(30);
+		List<Diary> expiredDiaries = diaryRepository.findByDeletedAtBefore(threshold);
+		diaryRepository.deleteAll(expiredDiaries);
+	}
+
+
 }

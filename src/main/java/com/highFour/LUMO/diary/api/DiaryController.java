@@ -55,4 +55,10 @@ public class DiaryController {
 		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
 	}
 
+	@GetMapping("/delete/{diaryId}")
+	public ResponseEntity<?>  deleteDiary(@PathVariable(name = "diaryId") Long diaryId) {
+		 diaryService.deleteDiary(diaryId);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
 }

@@ -21,6 +21,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	// 타입별 본문에서 검색
 	List<Diary> findByTypeAndContentsContainingIgnoreCase(DiaryType type, String title);
 
-
-
+	// 삭제 후 30일지나면 영구 삭제
+	List<Diary> findByDeletedAtBefore(LocalDateTime threshold);
 }
