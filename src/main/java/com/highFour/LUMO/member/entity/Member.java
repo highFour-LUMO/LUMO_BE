@@ -7,14 +7,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Builder
+@SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at is NULL")
 @Getter
 public class Member extends BaseTimeEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,29 +30,24 @@ public class Member extends BaseTimeEntity {
     private String name;
 
     @NotNull
-    private String nickname;
-
-    @NotNull
-    private String password;
-
-    @NotNull
     private String email;
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private SocialType socialType;
 
-    private String profileImgUrl;
+    @NotNull
+    private String socialId;
 
-    @Builder.Default
-    private boolean isVerified = false;
+    @NotNull
+    private String profileUrl;
 
+    @NotNull
+    private String point;
 
-    public Member updateName(String temp) {
-        this.name = temp;
-        return this;
+    public void updateprofileUrl(String profileUrl){
+        this.profileUrl = profileUrl;
     }
 
-    public Member updatePass(String uuidPass) {
-        this.password = uuidPass;
-        return this;
-    }
+
 }
