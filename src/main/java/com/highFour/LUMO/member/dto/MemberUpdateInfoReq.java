@@ -4,10 +4,10 @@ import com.highFour.LUMO.member.entity.Member;
 import lombok.Builder;
 
 @Builder
-public record MemberUpdateInfoRequest(String profileUrl) {
+public record MemberUpdateInfoReq(String profileUrl) {
 
-    public static MemberUpdateInfoRequest newInfo(Member member){
-        return MemberUpdateInfoRequest.builder()
+    public static MemberUpdateInfoReq newInfo(Member member){
+        return MemberUpdateInfoReq.builder()
                 .profileUrl(member.getProfileUrl())
                 .build();
     }

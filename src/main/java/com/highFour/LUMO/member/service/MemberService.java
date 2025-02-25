@@ -6,7 +6,7 @@ import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.service.JwtService;
 import com.highFour.LUMO.member.dto.*;
 import com.highFour.LUMO.member.entity.Member;
-import com.highFour.LUMO.member.entity.MemberRole;
+import com.highFour.LUMO.member.entity.Role;
 import com.highFour.LUMO.member.entity.SocialType;
 import com.highFour.LUMO.member.oauth.google.service.GoogleService;
 import com.highFour.LUMO.member.oauth.kakao.service.KakaoService;
@@ -28,30 +28,30 @@ public class MemberService {
     private final JwtService jwtService;
 
     @Transactional
-    public SignInResponse signIn(final String socialAccessToken, final SocialType socialType) {
-        MemberInfoServiceResponse signedMember = getMemberInfo(socialType, socialAccessToken);
+    public SignInRes signIn(final String socialAccessToken, final SocialType socialType) {
+        MemberInfoServiceRes signedMember = getMemberInfo(socialType, socialAccessToken);
         // DB 에서 회원 찾기
         Optional<Member> optionalMember = memberRepository.findBySocialIdAndSocialType(signedMember.socialId(), socialType);
         Member member = optionalMember.orElseThrow(()->new BaseCustomException(MemberExceptionType.NEED_TO_REGISTER));
-        JwtToken jwtToken = jwtService.issueToken(member.getId(), MemberRole.USER.toString());
-        return SignInResponse.fromEntity(member, jwtToken);
+        JwtToken jwtToken = jwtService.issueToken(member.getId(), Role.USER.toString());
+        return SignInRes.fromEntity(member, jwtToken);
     }
 
     @Transactional
-    public SignUpResponse signUp(String socialAccessToken, SignUpRequest signUpRequest) {
-        MemberInfoServiceResponse memberInfo = getMemberInfo(signUpRequest.socialType(), socialAccessToken);
+    public SignUpRes signUp(String socialAccessToken, SignUpReq signUpReq) {
+        MemberInfoServiceRes memberInfo = getMemberInfo(signUpReq.socialType(), socialAccessToken);
         Optional<Member> existingMember = memberRepository.findBySocialIdAndSocialType(memberInfo.socialId(), memberInfo.socialType());
         if (existingMember.isPresent()) {
             throw new BaseCustomException(MemberExceptionType.NOT_A_NEW_MEMBER);
         }
-        Member member = signUpRequest.toEntity(memberInfo.socialId(), memberInfo.email());
+        Member member = signUpReq.toEntity(memberInfo.socialId(), memberInfo.email());
         memberRepository.save(member);
-        JwtToken jwtToken = jwtService.issueToken(member.getId(), MemberRole.USER.toString());
+        JwtToken jwtToken = jwtService.issueToken(member.getId(), Role.USER.toString());
 
-        return SignUpResponse.fromEntity(member, jwtToken);
+        return SignUpRes.fromEntity(member, jwtToken);
     }
 
-    private MemberInfoServiceResponse getMemberInfo(SocialType socialType, String socialAccessToken) {
+    private MemberInfoServiceRes getMemberInfo(SocialType socialType, String socialAccessToken) {
         return switch (socialType) {
             case KAKAO -> kakaoService.getMemberInfo(socialAccessToken);
             case GOOGLE -> googleService.getMemberInfo(socialAccessToken);
@@ -72,20 +72,20 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberInfoResponse getMemberInfo(Long memberId) {
+    public MemberInfoRes getMemberInfo(Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
 
-        return MemberInfoResponse.fromEntity(member);
+        return MemberInfoRes.fromEntity(member);
     }
 
 
 
     @Transactional
-    public MemberUpdateInfoRequest updateMemberInfo(MemberUpdateInfoRequest updateInfo, Long memberId) {
+    public MemberUpdateInfoReq updateMemberInfo(MemberUpdateInfoReq updateInfo, Long memberId) {
         Member member = memberRepository.findByIdOrThrow(memberId);
         member.updateprofileUrl(updateInfo.profileUrl());
 
-        return MemberUpdateInfoRequest.newInfo(member);
+        return MemberUpdateInfoReq.newInfo(member);
     }
 
 }
