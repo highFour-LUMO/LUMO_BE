@@ -1,7 +1,7 @@
 package com.highFour.LUMO.member.oauth.google.service;
 
 import com.highFour.LUMO.common.exception.BaseCustomException;
-import com.highFour.LUMO.member.dto.MemberInfoServiceResponse;
+import com.highFour.LUMO.member.dto.MemberInfoServiceRes;
 import com.highFour.LUMO.member.oauth.google.config.GoogleOAuthConfig;
 import com.highFour.LUMO.member.oauth.google.dto.GoogleGetMemberInfoServiceResponse;
 import com.highFour.LUMO.member.oauth.service.OAuthService;
@@ -22,7 +22,7 @@ public class GoogleService implements OAuthService {
 
     private final GoogleOAuthConfig googleOAuthConfig;
 
-    public MemberInfoServiceResponse getMemberInfo(final String accessToken) {
+    public MemberInfoServiceRes getMemberInfo(final String accessToken) {
         GoogleGetMemberInfoServiceResponse response = null;
         try {
             RestClient restClient = RestClient.create();
@@ -41,7 +41,7 @@ public class GoogleService implements OAuthService {
         }
 
         assert response != null;
-        return new MemberInfoServiceResponse(response.id(), GOOGLE, response.email());
+        return new MemberInfoServiceRes(response.id(), GOOGLE, response.email());
     }
 
 }

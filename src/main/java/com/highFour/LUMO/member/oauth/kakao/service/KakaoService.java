@@ -1,7 +1,7 @@
 package com.highFour.LUMO.member.oauth.kakao.service;
 
 import com.highFour.LUMO.common.exception.BaseCustomException;
-import com.highFour.LUMO.member.dto.MemberInfoServiceResponse;
+import com.highFour.LUMO.member.dto.MemberInfoServiceRes;
 import com.highFour.LUMO.member.entity.SocialType;
 import com.highFour.LUMO.member.oauth.kakao.config.KakaoOAuthConfig;
 import com.highFour.LUMO.member.oauth.kakao.dto.KakaoGetMemberInfoServiceResponse;
@@ -21,7 +21,7 @@ public class KakaoService implements OAuthService {
     private final KakaoOAuthConfig kakaoOAuthConfig;
 
     // 카카오 API 에 로그인 요청을 보내고 회원 정보를 가져오기
-    public MemberInfoServiceResponse getMemberInfo(final String accessToken){
+    public MemberInfoServiceRes getMemberInfo(final String accessToken){
         KakaoGetMemberInfoServiceResponse response = null;
         RestClient restClient = RestClient.create();
         response = restClient.get()
@@ -36,7 +36,7 @@ public class KakaoService implements OAuthService {
         if (response == null) {
             throw new BaseCustomException(FAIL_TO_AUTH);
         }
-        return new MemberInfoServiceResponse(response.id(), SocialType.KAKAO, response.kakao_account().email());
+        return new MemberInfoServiceRes(response.id(), SocialType.KAKAO, response.kakao_account().email());
     }
 
 }

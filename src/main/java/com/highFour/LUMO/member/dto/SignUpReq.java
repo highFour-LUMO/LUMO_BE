@@ -4,8 +4,8 @@ package com.highFour.LUMO.member.dto;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.entity.SocialType;
 
-public record SignUpRequest(SocialType socialType,
-                            String name
+public record SignUpReq(SocialType socialType,
+                        String name
 ) {
     public Member toEntity(String socialId, String email) {
         return Member.builder()

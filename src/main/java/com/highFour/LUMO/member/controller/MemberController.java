@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 
 @Slf4j
 @RequestMapping("/member")
@@ -24,23 +22,23 @@ public class MemberController {
 
     // 소셜 로그인
     @PostMapping("/sign-in")
-    public ResponseEntity<SignInResponse> signIn(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignInRequest signInRequest) {
+    public ResponseEntity<SignInRes> signIn(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignInReq signInReq) {
         String bearerToken = authorizationHeader.replace("Bearer ", "");
-        SignInResponse signInResponse = memberService.signIn(bearerToken, signInRequest.socialType());
-        return new ResponseEntity<>(signInResponse, HttpStatus.OK);
+        SignInRes signInRes = memberService.signIn(bearerToken, signInReq.socialType());
+        return new ResponseEntity<>(signInRes, HttpStatus.OK);
     }
 
     // 회원가입
     @PostMapping("/sign-up")
-    public ResponseEntity<SignUpResponse> signUp(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignUpRequest signUpRequest) {
+    public ResponseEntity<SignUpRes> signUp(@RequestHeader("X-AUTH-TOKEN") final String authorizationHeader, @RequestBody final SignUpReq signUpReq) {
         String socialAccessToken = authorizationHeader.replace("Bearer ", "");
-        SignUpResponse signUpResponse = memberService.signUp(socialAccessToken, signUpRequest);
+        SignUpRes signUpRes = memberService.signUp(socialAccessToken, signUpReq);
 
-        return new ResponseEntity<>(signUpResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(signUpRes, HttpStatus.CREATED);
     }
 
     @PostMapping("/sign-out")
-    public ResponseEntity<SignOutRequest> signOut(@RequestHeader("myId") Long memberId){
+    public ResponseEntity<SignOutReq> signOut(@RequestHeader("myId") Long memberId){
         memberService.signOut(memberId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -52,15 +50,15 @@ public class MemberController {
     }
 
     @GetMapping("/member-info")
-    public ResponseEntity<MemberInfoResponse> getMemberInfo(@RequestHeader("myId") Long memberId){
-        MemberInfoResponse memberInfo =  memberService.getMemberInfo(memberId);
+    public ResponseEntity<MemberInfoRes> getMemberInfo(@RequestHeader("myId") Long memberId){
+        MemberInfoRes memberInfo =  memberService.getMemberInfo(memberId);
         return new ResponseEntity<>(memberInfo, HttpStatus.OK);
     }
 
 
 
     @PatchMapping("/update-info")
-    public ResponseEntity<MemberUpdateInfoRequest> updateMemberInfo(@RequestBody MemberUpdateInfoRequest updateInfo, @RequestHeader("myId") Long memberId){
+    public ResponseEntity<MemberUpdateInfoReq> updateMemberInfo(@RequestBody MemberUpdateInfoReq updateInfo, @RequestHeader("myId") Long memberId){
         memberService.updateMemberInfo(updateInfo, memberId);
         return new ResponseEntity<>(updateInfo, HttpStatus.OK);
     }
