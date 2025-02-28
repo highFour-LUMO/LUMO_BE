@@ -15,7 +15,7 @@ import com.highFour.LUMO.diary.entity.Visibility;
 import lombok.Builder;
 
 @Builder
-public record DiaryCreateReqDto(
+public record DiaryCreateReq(
 	Long memberId,
 	String title,
 	String contents,

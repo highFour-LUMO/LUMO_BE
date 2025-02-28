@@ -10,7 +10,7 @@ import com.highFour.LUMO.diary.entity.Visibility;
 import lombok.Builder;
 
 @Builder
-public record DiaryDetResDto (
+public record DiaryDetRes(
 	String title,
 	String contents,
 	String member,
@@ -19,8 +19,8 @@ public record DiaryDetResDto (
 	Visibility visibility,
 	List<String> imgUrls
 ){
-	public static DiaryDetResDto fromEntity(Diary diary, List<String> imgUrls) {
-		return DiaryDetResDto.builder()
+	public static DiaryDetRes fromEntity(Diary diary, List<String> imgUrls) {
+		return DiaryDetRes.builder()
 			.title(diary.getTitle())
 			.contents(diary.getContents())
 			.member(null)

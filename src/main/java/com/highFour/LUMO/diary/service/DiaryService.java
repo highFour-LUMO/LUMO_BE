@@ -11,12 +11,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import com.highFour.LUMO.common.exception.BaseCustomException;
-import com.highFour.LUMO.diary.dto.DiaryCreateReqDto;
-import com.highFour.LUMO.diary.dto.DiaryDetResDto;
-import com.highFour.LUMO.diary.dto.DiaryListResDto;
-import com.highFour.LUMO.diary.dto.DiarySearchReqDto;
+import com.highFour.LUMO.diary.dto.DiaryCreateReq;
+import com.highFour.LUMO.diary.dto.DiaryDetRes;
+import com.highFour.LUMO.diary.dto.DiaryListRes;
+import com.highFour.LUMO.diary.dto.DiarySearchReq;
 import com.highFour.LUMO.diary.entity.Category;
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.entity.DiaryHashtagRelation;
@@ -54,7 +53,7 @@ public class DiaryService {
 
 	// 일기 작성
 	@Transactional
-	public Diary createDiary(DiaryCreateReqDto reqDto) {
+	public Diary createDiary(DiaryCreateReq req) {
 		// 입력 null에 대한 예외 처리 필요
 		// 로그인한 사용자로만 일기 조회 처리 필요
 
@@ -64,28 +63,28 @@ public class DiaryService {
 		LocalDateTime endOfDay = today.atTime(23, 59, 59);
 
 		boolean diaryExists = diaryRepository.existsByTypeAndCreatedAtBetween(
-			reqDto.type(), startOfDay, endOfDay
+			req.type(), startOfDay, endOfDay
 		);
 		if (diaryExists) {
 			throw new BaseCustomException(DIARY_ALREADY_EXIST);
 		}
 
 		// 일기 or 감사일기에 따른 감정, 카테고리 저장
-		Emotion emotion = emotionRepository.findById(reqDto.type() == DiaryType.DIARY ? reqDto.emotionId() : 1L)
+		Emotion emotion = emotionRepository.findById(req.type() == DiaryType.DIARY ? req.emotionId() : 1L)
 			.orElseThrow(() -> new BaseCustomException(EMOTION_NOT_FOUND));
-		Category category = categoryRepository.findById(reqDto.type() == DiaryType.GRATITUDE ? reqDto.categoryId() : 1L)
+		Category category = categoryRepository.findById(req.type() == DiaryType.GRATITUDE ? req.categoryId() : 1L)
 			.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
 
-		Diary diary = reqDto.toEntity(emotion, category);
+		Diary diary = req.toEntity(emotion, category);
 		diaryRepository.save(diary);
 
-		List<Hashtag> hashtags = toHashtags(reqDto.hashtags());
+		List<Hashtag> hashtags = toHashtags(req.hashtags());
 		hashtagRepository.saveAll(hashtags);
 
-		List<DiaryHashtagRelation> diaryHashtagRelations = reqDto.toDiaryHashtagRelation(diary, hashtags);
+		List<DiaryHashtagRelation> diaryHashtagRelations = req.toDiaryHashtagRelation(diary, hashtags);
 		diaryHashtagRelationRepository.saveAll(diaryHashtagRelations);
 
-		List<DiaryImg> diaryImgs = reqDto.toDiaryImg(diary);
+		List<DiaryImg> diaryImgs = req.toDiaryImg(diary);
 		diaryImgRepository.saveAll(diaryImgs);
 
 		return diary;
@@ -101,35 +100,35 @@ public class DiaryService {
 	}
 
 	// 일기 상세 조회
-	public DiaryDetResDto getDiaryByDiaryId(Long diaryId) {
+	public DiaryDetRes getDiaryByDiaryId(Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
 
 		List<DiaryImg> urls = diaryImgRepository.findByDiaryId(diaryId);
-		List<String> imgs = DiaryDetResDto.fromDiaryImg(urls);
+		List<String> imgs = DiaryDetRes.fromDiaryImg(urls);
 
-		return DiaryDetResDto.fromEntity(diary, imgs);
+		return DiaryDetRes.fromEntity(diary, imgs);
 	}
 
 	// 일기 목록 조회
-	public List<DiaryListResDto> getDiaryList(DiaryType type) {
+	public List<DiaryListRes> getDiaryList(DiaryType type) {
 		List<Diary> diaryList = diaryRepository.findByType(type);
 		return diaryList.stream()
-			.map(DiaryListResDto::fromEntity)
+			.map(DiaryListRes::fromEntity)
 			.collect(Collectors.toList());
 	}
 
 	// 제목에서 검색
-	public List<DiaryListResDto> searchByKeyword(DiarySearchReqDto dto) {
+	public List<DiaryListRes> searchByKeyword(DiarySearchReq req) {
 		List<Diary> diaryList = null;
 
-		if (dto.searchType().equals("제목")) {
-			diaryList = diaryRepository.findByTypeAndTitleContainingIgnoreCase(dto.type(), dto.keyword());
-		}else if (dto.searchType().equals("내용")) {
-			diaryList = diaryRepository.findByTypeAndContentsContainingIgnoreCase(dto.type(), dto.keyword());
+		if (req.searchType().equals("제목")) {
+			diaryList = diaryRepository.findByTypeAndTitleContainingIgnoreCase(req.type(), req.keyword());
+		}else if (req.searchType().equals("내용")) {
+			diaryList = diaryRepository.findByTypeAndContentsContainingIgnoreCase(req.type(), req.keyword());
 		}
 		return diaryList.stream()
-			.map(DiaryListResDto::fromEntity)
+			.map(DiaryListRes::fromEntity)
 			.collect(Collectors.toList());
 	}
 
