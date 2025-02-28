@@ -37,14 +37,11 @@ public class Member extends BaseTimeEntity {
 
     private String nickname;
 
-    @NotNull
     @Enumerated(value = EnumType.STRING)
     private SocialType socialType;
 
-    @NotNull
     private String socialId;
 
-    @NotNull
     private String profileUrl;
 
     private String point;
@@ -55,7 +52,7 @@ public class Member extends BaseTimeEntity {
     private String refreshToken; // 리프레시 토큰
 
     public void authorizeUser() {
-        this.role = Role.GUEST;
+        this.role = Role.MEMBER;
     }
 
     public void updateprofileUrl(String profileUrl){
