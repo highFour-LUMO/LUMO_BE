@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,11 +27,15 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+
     private String name;
+
+    private String password;
 
     @NotNull
     private String email;
+
+    private String nickname;
 
     @NotNull
     @Enumerated(value = EnumType.STRING)
@@ -42,12 +47,28 @@ public class Member extends BaseTimeEntity {
     @NotNull
     private String profileUrl;
 
-    @NotNull
     private String point;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    private String refreshToken; // 리프레시 토큰
+
+    public void authorizeUser() {
+        this.role = Role.GUEST;
+    }
 
     public void updateprofileUrl(String profileUrl){
         this.profileUrl = profileUrl;
     }
 
+    // 비밀번호 암호화 메소드
+    public void passwordEncode(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(this.password);
+    }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
+    }
 
 }

@@ -20,11 +20,10 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
         return findById(memberId).orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND));
     }
 
+    Optional<Member> findByEmail(String email);
 
-    @Query("SELECT m FROM Member m WHERE m.id IN :ids")
-    List<Member> findByAllByIds(@Param("ids") List<Long> ids);
+    Optional<Member> findByNickname(String nickname);
 
-    @Query(value = "SELECT m.* FROM member AS m WHERE m.id IN :ids", nativeQuery = true)
-    List<Member> findAllByIdContainDeleted(List<Long> ids);
+    Optional<Member> findByRefreshToken(String refreshToken);
 
 }
