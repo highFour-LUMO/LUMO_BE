@@ -33,13 +33,13 @@ public class EmailConfig {
     @Value("${spring.mail.properties.mail.smtp.starttls.required}")
     private boolean starttlsRequired;
 
-    @Value("${spring.mail.properties.mail.smtp.connectiontimeout}")
+    @Value("${spring.mail.properties.mail.smtp.connection timeout}")
     private int connectionTimeout;
 
     @Value("${spring.mail.properties.mail.smtp.timeout}")
     private int timeout;
 
-    @Value("${spring.mail.properties.mail.smtp.writetimeout}")
+    @Value("${spring.mail.properties.mail.smtp.write timeout}")
     private int writeTimeout;
 
     @Bean

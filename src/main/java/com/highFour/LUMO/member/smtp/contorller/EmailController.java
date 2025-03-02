@@ -1,9 +1,11 @@
 package com.highFour.LUMO.member.smtp.contorller;
 
+import com.highFour.LUMO.member.smtp.dto.EmailCheckReq;
+import com.highFour.LUMO.member.smtp.dto.EmailSendReq;
 import com.highFour.LUMO.member.smtp.service.EmailService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,27 +19,23 @@ public class EmailController {
 
     private final EmailService emailService;
 
-    /**
-     * 인증 코드 메일 전송
-     */
-    @PostMapping("/send")
-    public ResponseEntity<String> sendEmail(@RequestBody RequestEmailCheck request) {
-        emailService.sendMessage(request.getEmail());
-        return ResponseEntity.status(HttpStatus.OK).body("인증 코드가 발송되었습니다.");
+
+    @PostMapping("/sendEmail")
+    public String mailSend(@RequestBody @Valid EmailSendReq emailDto) {
+        System.out.println("이메일 인증 이메일 :" + emailDto.email());
+        return emailService.joinEmail(emailDto.email());
     }
 
-    /**
-     * 인증 코드 확인
-     */
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyCode(@RequestBody RequestEmailCheck request) {
-        boolean isChecked = emailService.verifyCode(request.getEmail(), request.getCode());
-
-        if(isChecked) {
-            return ResponseEntity.status(HttpStatus.OK).body("인증이 완료되었습니다.");
+    @PostMapping("/mailauthCheck")
+    public String AuthCheck(@RequestBody @Valid EmailCheckReq emailCheckReq) {
+        System.out.println(emailCheckReq.email()+"   ---   "+ emailCheckReq.authNum());
+        Boolean Checked=emailService.CheckAuthNum(emailCheckReq.email(), emailCheckReq.authNum());
+        if(Checked){
+            return "ok";
         }
         else{
-            return ResponseEntity.status(HttpStatus.OK).body("인증에 실패했습니다.");
+            throw new NullPointerException("뭔가 잘못!");
         }
     }
+
 }
