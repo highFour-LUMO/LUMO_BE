@@ -74,15 +74,6 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    /**
-     * AccessToken 헤더에 실어서 보내기
-     */
-    public void sendAccessToken(HttpServletResponse response, String accessToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        response.setHeader(accessHeader, accessToken);
-        log.info("재발급된 Access Token : {}", accessToken);
-    }
 
     /**
      * AccessToken + RefreshToken 헤더에 실어서 보내기

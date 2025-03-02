@@ -47,6 +47,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 }
 
 // 스프링 클라우드에 대한 버전 지정
