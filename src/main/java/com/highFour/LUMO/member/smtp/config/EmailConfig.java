@@ -1,4 +1,4 @@
-package com.highFour.LUMO.member.config;
+package com.highFour.LUMO.member.smtp.config;
 
 
 import org.springframework.beans.factory.annotation.Value;
