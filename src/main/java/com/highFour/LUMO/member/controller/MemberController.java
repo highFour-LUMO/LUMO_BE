@@ -1,11 +1,12 @@
 package com.highFour.LUMO.member.controller;
 
 import com.highFour.LUMO.member.dto.*;
+
 import com.highFour.LUMO.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 
 @Slf4j
 @RequestMapping("/member")
@@ -25,5 +26,4 @@ public class MemberController {
     public String jwtTest() {
         return "jwtTest 요청 성공";
     }
-
 }

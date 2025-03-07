@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Entity
 @NoArgsConstructor
@@ -46,4 +48,8 @@ public class Diary extends BaseTimeEntity {
 
 	@Enumerated(EnumType.STRING)
 	private Visibility visibility;
+
+	public void softDeleteDiary() {
+		setDeletedAt(LocalDateTime.now());
+	}
 }

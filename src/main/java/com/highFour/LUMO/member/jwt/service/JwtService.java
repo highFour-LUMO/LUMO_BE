@@ -74,7 +74,6 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-
     /**
      * AccessToken + RefreshToken 헤더에 실어서 보내기
      */
