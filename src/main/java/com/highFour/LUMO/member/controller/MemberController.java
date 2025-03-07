@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-
 @Slf4j
 @RequestMapping("/member")
 @RestController
@@ -25,7 +24,6 @@ public class MemberController {
 
     @GetMapping("/jwt-test")
     public String jwtTest() {
-        System.out.println("test-----------"+SecurityContextHolder.getContext().getAuthentication().getName());
         return "jwtTest 요청 성공";
     }
 }
