@@ -23,6 +23,7 @@ public record DiaryCreateReq(
 	List<String> imgUrls,
 	Long emotionId,
 	Long categoryId,
+	Long rating,
 	DiaryType type,
 	Visibility visibility
 ) {
@@ -35,6 +36,7 @@ public record DiaryCreateReq(
 			.visibility(this.visibility)
 			.emotion(emotion)
 			.category(category)
+			.rating(this.rating)
 			.build();
 	}
 

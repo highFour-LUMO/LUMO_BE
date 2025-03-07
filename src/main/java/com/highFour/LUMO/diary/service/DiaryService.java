@@ -65,6 +65,14 @@ public class DiaryService {
 		Long memberId = memberRepository.findByEmail(memberEmail)
 			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
 
+		if (req.title().length() > 50) {
+			throw new BaseCustomException(TITLE_TOO_LONG);
+		}
+
+		if (req.contents().length() > 3000) {
+			throw new BaseCustomException(CONTENTS_TOO_LONG);
+		}
+
 		isExistDiary(req, memberId);
 
 		// 일기 or 감사일기에 따른 감정, 카테고리 저장
