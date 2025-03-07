@@ -1,5 +1,6 @@
 package com.highFour.LUMO.member.smtp.contorller;
 
+import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.smtp.dto.EmailCheckReq;
 import com.highFour.LUMO.member.smtp.dto.EmailSendReq;
 import com.highFour.LUMO.member.smtp.service.EmailService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailController {
 
     private final EmailService emailService;
+
 
 
     @PostMapping("/sendEmail")

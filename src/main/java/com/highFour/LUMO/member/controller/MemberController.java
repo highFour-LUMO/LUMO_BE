@@ -16,8 +16,8 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestBody SignUpReq signUpReq) throws Exception {
-        memberService.signUp(signUpReq);
+    public String signUp(@RequestBody MemberSignUpReq memberSignUpReq) throws Exception {
+        memberService.signUp(memberSignUpReq);
         return "회원가입 성공";
     }
 
