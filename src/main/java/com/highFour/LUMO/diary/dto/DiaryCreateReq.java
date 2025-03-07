@@ -26,9 +26,9 @@ public record DiaryCreateReq(
 	DiaryType type,
 	Visibility visibility
 ) {
-	public Diary toEntity(Emotion emotion, Category category){
+	public Diary toEntity(Emotion emotion, Category category, Long memberId){
 		return Diary.builder()
-			.memberId(this.memberId)
+			.memberId(memberId)
 			.type(this.type)
 			.title(this.title)
 			.contents(this.contents)

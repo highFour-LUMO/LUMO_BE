@@ -1,6 +1,7 @@
 package com.highFour.LUMO.diary.service;
 
 import static com.highFour.LUMO.common.exceptionType.DiaryExceptionType.*;
+import static com.highFour.LUMO.common.exceptionType.MemberExceptionType.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ import com.highFour.LUMO.diary.repository.DiaryImgRepository;
 import com.highFour.LUMO.diary.repository.DiaryRepository;
 import com.highFour.LUMO.diary.repository.EmotionRepository;
 import com.highFour.LUMO.diary.repository.HashtagRepository;
+import com.highFour.LUMO.member.repository.MemberRepository;
 
 @Service
 public class DiaryService {
@@ -38,17 +41,19 @@ public class DiaryService {
 	private final DiaryImgRepository diaryImgRepository;
 	private final DiaryRepository diaryRepository;
 	private final DiaryHashtagRelationRepository diaryHashtagRelationRepository;
+	private final MemberRepository memberRepository;
 
 	public DiaryService(EmotionRepository emotionRepository, CategoryRepository categoryRepository,
 		HashtagRepository hashtagRepository,
 		DiaryImgRepository diaryImgRepository, DiaryRepository diaryRepository,
-		DiaryHashtagRelationRepository diaryHashtagRelationRepository) {
+		DiaryHashtagRelationRepository diaryHashtagRelationRepository, MemberRepository memberRepository) {
 		this.emotionRepository = emotionRepository;
 		this.categoryRepository = categoryRepository;
 		this.hashtagRepository = hashtagRepository;
 		this.diaryImgRepository = diaryImgRepository;
 		this.diaryRepository = diaryRepository;
 		this.diaryHashtagRelationRepository = diaryHashtagRelationRepository;
+		this.memberRepository = memberRepository;
 	}
 
 	// 일기 작성
@@ -56,18 +61,11 @@ public class DiaryService {
 	public Diary createDiary(DiaryCreateReq req) {
 		// 입력 null에 대한 예외 처리 필요
 		// 로그인한 사용자로만 일기 조회 처리 필요
+		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		Long memberId = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
 
-		// 오늘의 일기가 이미 존재하는지 확인
-		LocalDate today = LocalDate.now();
-		LocalDateTime startOfDay = today.atStartOfDay();
-		LocalDateTime endOfDay = today.atTime(23, 59, 59);
-
-		boolean diaryExists = diaryRepository.existsByTypeAndCreatedAtBetween(
-			req.type(), startOfDay, endOfDay
-		);
-		if (diaryExists) {
-			throw new BaseCustomException(DIARY_ALREADY_EXIST);
-		}
+		isExistDiary(req, memberId);
 
 		// 일기 or 감사일기에 따른 감정, 카테고리 저장
 		Emotion emotion = emotionRepository.findById(req.type() == DiaryType.DIARY ? req.emotionId() : 1L)
@@ -75,7 +73,7 @@ public class DiaryService {
 		Category category = categoryRepository.findById(req.type() == DiaryType.GRATITUDE ? req.categoryId() : 1L)
 			.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
 
-		Diary diary = req.toEntity(emotion, category);
+		Diary diary = req.toEntity(emotion, category, memberId);
 		diaryRepository.save(diary);
 
 		List<Hashtag> hashtags = toHashtags(req.hashtags());
@@ -150,5 +148,19 @@ public class DiaryService {
 		diaryRepository.deleteAll(expiredDiaries);
 	}
 
+
+	public void isExistDiary(DiaryCreateReq req, Long memberId){
+		// 오늘의 일기가 이미 존재하는지 확인
+		LocalDate today = LocalDate.now();
+		LocalDateTime startOfDay = today.atStartOfDay();
+		LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+		boolean diaryExists = diaryRepository.existsByMemberIdAndTypeAndCreatedAtBetween(
+			memberId, req.type(), startOfDay, endOfDay
+		);
+		if (diaryExists) {
+			throw new BaseCustomException(DIARY_ALREADY_EXIST);
+		}
+	}
 
 }
