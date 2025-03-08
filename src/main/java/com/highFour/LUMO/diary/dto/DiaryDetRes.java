@@ -16,6 +16,7 @@ public record DiaryDetRes(
 	String member,
 	String emotion,
 	String category,
+	Long rating,
 	Visibility visibility,
 	List<String> imgUrls
 ){
@@ -26,6 +27,7 @@ public record DiaryDetRes(
 			.member(null)
 			.emotion(diary.getEmotion().getLabel())
 			.category(diary.getCategory().getLabel())
+			.rating(diary.getRating())
 			.imgUrls(imgUrls)
 			.build();
 	}

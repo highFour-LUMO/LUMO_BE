@@ -63,4 +63,17 @@ public class DiaryController {
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
+	@GetMapping("/rating/weekly")
+	public ResponseEntity<?>  getWeeklyAvgRating() {
+		Double weeklyAvgRating  = diaryService.getWeeklyAvgRating();
+		return new ResponseEntity<>(weeklyAvgRating, HttpStatus.CREATED);
+	}
+
+	@GetMapping("/rating/monthly")
+	public ResponseEntity<?>  getMonthlyAvgRating() {
+		Double weeklyAvgRating  = diaryService.getMonthlyAvgRating();
+		return new ResponseEntity<>(weeklyAvgRating, HttpStatus.CREATED);
+	}
+
+
 }
