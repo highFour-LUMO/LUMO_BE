@@ -1,6 +1,5 @@
-package com.highFour.LUMO.member.smtp.contorller;
+package com.highFour.LUMO.member.smtp.api;
 
-import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.smtp.dto.EmailCheckReq;
 import com.highFour.LUMO.member.smtp.dto.EmailSendReq;
 import com.highFour.LUMO.member.smtp.service.EmailService;

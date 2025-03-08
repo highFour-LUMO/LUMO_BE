@@ -1,4 +1,4 @@
-package com.highFour.LUMO.member.controller;
+package com.highFour.LUMO.member.api;
 
 import com.highFour.LUMO.member.dto.*;
 import com.highFour.LUMO.member.service.MemberService;
