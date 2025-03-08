@@ -65,12 +65,19 @@ public class DiaryService {
 		Long memberId = memberRepository.findByEmail(memberEmail)
 			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
 
+		// 제목이 50자 이상인 경우
 		if (req.title().length() > 50) {
 			throw new BaseCustomException(TITLE_TOO_LONG);
 		}
 
+		// 내용이 3000자 이상인 경우
 		if (req.contents().length() > 3000) {
 			throw new BaseCustomException(CONTENTS_TOO_LONG);
+		}
+
+		// 오늘의 점수를 입력하지 않은 경우
+		if (req.type() == DiaryType.GRATITUDE && req.rating() == null) {
+			throw new BaseCustomException(RATING_NOT_FOUND);
 		}
 
 		isExistDiary(req, memberId);
@@ -171,4 +178,35 @@ public class DiaryService {
 		}
 	}
 
+	// 주간 평균 점수
+	public Double getWeeklyAvgRating() {
+		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		Long memberId = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
+
+		LocalDateTime endDate = LocalDateTime.now();  // 오늘
+		LocalDateTime startDate = endDate.minusDays(7);	// 이전 일주일
+
+		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		return diaries.stream()
+			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
+			.average()
+			.orElse(0.0);
+	}
+
+	// 월간 평균 점수
+	public Double getMonthlyAvgRating() {
+		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		Long memberId = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
+
+		LocalDateTime endDate = LocalDateTime.now();  // 오늘
+		LocalDateTime startDate = endDate.minusDays(30);	// 이전 일주일
+
+		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		return diaries.stream()
+			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
+			.average()
+			.orElse(0.0);
+	}
 }

@@ -26,4 +26,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 	// 삭제 후 30일지나면 영구 삭제
 	List<Diary> findByDeletedAtBefore(LocalDateTime threshold);
+
+	//  점수 계산
+	List<Diary> findByMemberIdAndCreatedAtBetween(Long memberId, LocalDateTime startDate, LocalDateTime endDate);
+
 }
