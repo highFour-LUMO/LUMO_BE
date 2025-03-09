@@ -146,12 +146,14 @@ public class DiaryService {
 	}
 
 	// 일기 삭제 시 임시보관함에 저장
+	@Transactional
 	public void deleteDiary(Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
 
 		// 임시보관함에 저장
 		diary.softDeleteDiary();
+		System.out.println(diary.getDeletedAt());
 	}
 
 	// 임시 보관 30일 이후 영구 삭제
@@ -187,7 +189,7 @@ public class DiaryService {
 		LocalDateTime endDate = LocalDateTime.now();  // 오늘
 		LocalDateTime startDate = endDate.minusDays(7);	// 이전 일주일
 
-		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		List<Diary> diaries = diaryRepository.findByMemberIdAndTypeAndCreatedAtBetween(memberId, DiaryType.GRATITUDE, startDate, endDate);
 		return diaries.stream()
 			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
 			.average()
@@ -203,7 +205,7 @@ public class DiaryService {
 		LocalDateTime endDate = LocalDateTime.now();  // 오늘
 		LocalDateTime startDate = endDate.minusDays(30);	// 이전 일주일
 
-		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		List<Diary> diaries = diaryRepository.findByMemberIdAndTypeAndCreatedAtBetween(memberId, DiaryType.GRATITUDE, startDate, endDate);
 		return diaries.stream()
 			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
 			.average()
