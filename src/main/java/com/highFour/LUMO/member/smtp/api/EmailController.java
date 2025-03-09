@@ -1,8 +1,5 @@
 package com.highFour.LUMO.member.smtp.api;
 
-import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
-import com.highFour.LUMO.member.entity.Member;
-import com.highFour.LUMO.member.repository.MemberRepository;
 import com.highFour.LUMO.member.smtp.dto.EmailCheckReq;
 import com.highFour.LUMO.member.smtp.dto.EmailSendReq;
 import com.highFour.LUMO.member.smtp.service.EmailService;
@@ -13,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+
 
 @Slf4j
 @RestController

@@ -13,7 +13,10 @@ public enum MemberExceptionType implements ExceptionType {
     NOT_A_NEW_NICKNAME(HttpStatus.BAD_REQUEST,"이미 존재하는 닉네임입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 회원이 존재하지 않습니다."),
     DELETED_MEMBER(HttpStatus.FORBIDDEN, "탈퇴한 회원입니다."),
-    NEED_TO_EMAIL_AUTH(HttpStatus.BAD_REQUEST,"이메일 인증이 필요합니다.");
+    NEED_TO_EMAIL_AUTH(HttpStatus.BAD_REQUEST,"이메일 인증이 필요합니다."),
+    EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "이미 인증된 이메일입니다."),
+    EMAIL_AUTH_ALREADY_SENT(HttpStatus.BAD_REQUEST, "인증번호가 이미 발송되었습니다. 10분 후에 다시 시도하세요."),
+    AUTH_NUMBER_EXPIRED(HttpStatus.BAD_REQUEST, "인증번호가 만료되었습니다. 새로운 인증번호를 요청하세요.");
 
 
 
