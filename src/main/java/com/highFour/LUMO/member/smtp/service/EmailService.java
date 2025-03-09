@@ -1,5 +1,8 @@
 package com.highFour.LUMO.member.smtp.service;
 
+import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
+import com.highFour.LUMO.member.entity.Member;
+import com.highFour.LUMO.member.repository.MemberRepository;
 import com.highFour.LUMO.member.smtp.util.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -7,9 +10,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Random;
 
@@ -23,6 +28,7 @@ public class EmailService {
     private int authNumber;
     @Autowired
     private RedisUtil redisUtil;
+    private final MemberRepository memberRepository;
 
     //임의의 6자리 양수를 반환합니다.
     public void makeRandomNumber() {
@@ -69,18 +75,25 @@ public class EmailService {
         }
         redisUtil.setDataExpire(Integer.toString(authNumber),toMail,60*5L);
     }
-    public boolean CheckAuthNum(String email,String authNum){
-        System.out.println(email + " serivce  " + authNum);
-        System.out.println("redis" + redisUtil.getData(authNum));
-        if(redisUtil.getData(authNum)==null){
-            return false;
+
+    @Transactional
+    public void CheckAuthNum(String email, String authNum) {
+        System.out.println(email + " service " + authNum);
+        System.out.println("redis " + redisUtil.getData(authNum));
+
+        // Redis에서 인증번호 확인
+        String storedEmail = redisUtil.getData(authNum);
+        if (storedEmail == null || !storedEmail.equals(email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다.");
         }
-        else if(redisUtil.getData(authNum).equals(email)){
-            return true;
-        }
-        else{
-            return false;
-        }
+
+        // 인증이 완료되면 해당 이메일의 계정을 찾아 isVerified 값을 true로 변경
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        member.updateIsVerified(true); // isVerified 값 변경
+        // @Transactional 덕분에 변경 사항이 자동 저장됨 (save() 호출 필요 없음)
     }
 
 }

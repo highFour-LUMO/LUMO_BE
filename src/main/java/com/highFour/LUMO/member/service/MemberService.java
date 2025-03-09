@@ -35,18 +35,29 @@ public class MemberService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     public void signUp(MemberSignUpReq memberSignUpReq) {
+        // 이메일 중복 체크
         if (memberRepository.findByEmail(memberSignUpReq.email()).isPresent()) {
-            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(), MemberExceptionType.NOT_A_NEW_MEMBER.message());
+            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(),
+                    MemberExceptionType.NOT_A_NEW_MEMBER.message());
         }
 
+        // 닉네임 중복 체크
         if (memberRepository.findByNickname(memberSignUpReq.nickname()).isPresent()) {
-            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_NICKNAME.httpStatus(), MemberExceptionType.NOT_A_NEW_NICKNAME.message());
+            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_NICKNAME.httpStatus(),
+                    MemberExceptionType.NOT_A_NEW_NICKNAME.message());
         }
 
-        Member member = memberSignUpReq.toEntity();
-        member.passwordEncode(passwordEncoder);
+        // 이메일 인증 여부 확인
+        if (!memberSignUpReq.isVerified()) {
+            throw new ResponseStatusException(MemberExceptionType.NEED_TO_EMAIL_AUTH.httpStatus(),
+                    MemberExceptionType.NEED_TO_EMAIL_AUTH.message());
+        }
+
+        Member member = memberSignUpReq.toEntity(passwordEncoder);
         memberRepository.save(member);
     }
+
+
 
     public void logout(HttpServletRequest request) {
         String accessToken = jwtService.extractAccessToken(request)
@@ -91,4 +102,6 @@ public class MemberService {
 
         logout(request);
     }
+
+
 }
