@@ -186,5 +186,16 @@ public class JwtService {
         log.info("Redis에서 Refresh Token 삭제 완료 - email: {}", email);
     }
 
-
+    public long getAccessTokenExpiration(String accessToken) {
+        try {
+            return JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(accessToken)
+                    .getExpiresAt()
+                    .getTime() - System.currentTimeMillis();
+        } catch (Exception e) {
+            log.error("유효하지 않은 Access Token: {}", e.getMessage());
+            throw new BaseCustomException(TokenExceptionType.INVALID_TOKEN);
+        }
+    }
 }
