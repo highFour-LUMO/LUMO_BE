@@ -3,10 +3,12 @@ package com.highFour.LUMO.member.service;
 
 
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
+import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
 import com.highFour.LUMO.member.dto.MemberSignUpReq;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.Authentication;
+
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.time.Duration;
 
@@ -48,17 +49,17 @@ public class MemberService {
     }
 
     public void logout(HttpServletRequest request) {
-        String accessToken = jwtService.extractAccessToken(request).orElse(null);
-        if (accessToken == null || !jwtService.isTokenValid(accessToken)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Access Token");
+        String accessToken = jwtService.extractAccessToken(request)
+                .orElseThrow(() -> new ResponseStatusException(TokenExceptionType.INVALID_TOKEN.httpStatus(), TokenExceptionType.INVALID_TOKEN.message()));
+
+        if (!jwtService.isTokenValid(accessToken)) {
+            throw new ResponseStatusException(TokenExceptionType.INVALID_TOKEN.httpStatus(), TokenExceptionType.INVALID_TOKEN.message());
         }
 
-        String email = jwtService.extractEmail(accessToken).orElse(null);
-        if (email == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Access Token");
-        }
+        String email = jwtService.extractEmail(accessToken)
+                .orElseThrow(() -> new ResponseStatusException(TokenExceptionType.MEMBER_NOT_FOUND.httpStatus(), TokenExceptionType.MEMBER_NOT_FOUND.message()));
 
-        // ✅ Access Token을 블랙리스트에 저장 (만료시간까지)
+        // Access Token을 블랙리스트에 저장 (만료시간까지)
         long expiration = jwtService.getAccessTokenExpiration(accessToken);
         if (expiration > 0) {
             redisTemplate.opsForValue().set("blacklist:" + accessToken, "logout", Duration.ofMillis(expiration));
@@ -67,7 +68,7 @@ public class MemberService {
             log.warn("🚨 Access Token이 이미 만료됨 - 블랙리스트에 저장하지 않음");
         }
 
-        // ✅ Refresh Token 삭제
+        // Refresh Token 삭제
         if (jwtService.getRefreshTokenFromRedis(email) != null) {
             jwtService.deleteRefreshToken(email);
             log.info("✅ Refresh Token 삭제 완료: {}", email);
@@ -79,4 +80,15 @@ public class MemberService {
     }
 
 
+    public void deleteMember(Long id, HttpServletRequest request) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        // 논리적 삭제
+        member.updateDeleted(true);
+        memberRepository.save(member);
+
+        logout(request);
+    }
 }

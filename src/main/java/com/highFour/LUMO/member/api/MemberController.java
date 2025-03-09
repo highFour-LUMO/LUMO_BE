@@ -21,7 +21,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<MemberSignUpReq> signUp(@RequestBody MemberSignUpReq memberSignUpReq) throws Exception {
+    public ResponseEntity<MemberSignUpReq> signUp(@RequestBody MemberSignUpReq memberSignUpReq) {
         memberService.signUp(memberSignUpReq);
         return new ResponseEntity<>(memberSignUpReq, HttpStatus.OK);
     }
@@ -33,10 +33,13 @@ public class MemberController {
 
     @PostMapping("/sign-out")
     public ResponseEntity<?> logout(HttpServletRequest request) {
-        log.info("Logout request received");
-        log.info("Request: {}", request);
         memberService.logout(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}/delete")
+    public ResponseEntity<?> deleteMember(@PathVariable Long id, HttpServletRequest request) {
+        memberService.deleteMember(id, request);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
