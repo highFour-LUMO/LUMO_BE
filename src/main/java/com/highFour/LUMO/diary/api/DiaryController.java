@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +19,7 @@ import com.highFour.LUMO.diary.dto.DiaryCreateReq;
 import com.highFour.LUMO.diary.dto.DiaryDetRes;
 import com.highFour.LUMO.diary.dto.DiaryListRes;
 import com.highFour.LUMO.diary.dto.DiarySearchReq;
+import com.highFour.LUMO.diary.dto.DiaryUpdateReq;
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.entity.DiaryType;
 import com.highFour.LUMO.diary.service.DiaryService;
@@ -51,18 +54,25 @@ public class DiaryController {
 		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
 	}
 
-	// 검색어로 검색
-	@GetMapping("/search")
-	public ResponseEntity<?>  searchByKeyword(@RequestBody DiarySearchReq dto) {
-		List<DiaryListRes> diaryList = diaryService.searchByKeyword(dto);
-		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
-	}
-
 	// 일기 삭제
 	@DeleteMapping("/{diaryId}")
 	public ResponseEntity<?>  deleteDiary(@PathVariable(name = "diaryId") Long diaryId) {
 		 diaryService.deleteDiary(diaryId);
 		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	// 일기 삭제
+	@PatchMapping("")
+	public ResponseEntity<?> updateDiary(@RequestBody DiaryUpdateReq reqDto) {
+		diaryService.updateDiary(reqDto);
+		return new ResponseEntity<>("일기/감사일기 수정 성공", HttpStatus.CREATED);
+	}
+
+	// 검색어로 검색
+	@GetMapping("/search")
+	public ResponseEntity<?>  searchByKeyword(@RequestBody DiarySearchReq dto) {
+		List<DiaryListRes> diaryList = diaryService.searchByKeyword(dto);
+		return new ResponseEntity<>(diaryList, HttpStatus.CREATED);
 	}
 
 	// 주간 평균 점수
