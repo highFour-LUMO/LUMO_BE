@@ -6,6 +6,7 @@ import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
 import com.highFour.LUMO.member.dto.MemberSignUpReq;
 import com.highFour.LUMO.member.entity.Member;
+import com.highFour.LUMO.member.entity.Role;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
 import com.highFour.LUMO.member.smtp.util.RedisUtil;
@@ -62,6 +63,7 @@ public class MemberService {
         // 회원 정보 저장
         Member member = memberSignUpReq.toEntity(passwordEncoder);
         memberRepository.save(member);
+        member.authorizeUser();
     }
 
 

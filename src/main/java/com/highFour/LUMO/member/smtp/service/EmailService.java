@@ -37,20 +37,13 @@ public class EmailService {
     }
 
     public String joinEmail(String email) {
-        // 이미 인증이 완료된 경우 이메일 전송하지 않음
-        if ("true".equals(redisUtil.getData("email_verified:" + email))) {
-            throw new ResponseStatusException(MemberExceptionType.EMAIL_ALREADY_VERIFIED.httpStatus(),
-                    MemberExceptionType.EMAIL_ALREADY_VERIFIED.message());
-        }
-
-        // 기존 인증번호가 아직 유효하면 재전송하지 않음
-        if (redisUtil.getData("email_auth:" + email) != null) {
-            throw new ResponseStatusException(MemberExceptionType.EMAIL_AUTH_ALREADY_SENT.httpStatus(),
-                    MemberExceptionType.EMAIL_AUTH_ALREADY_SENT.message());
-        }
+        // 기존 인증 기록 삭제 (이전 인증 무효화)
+        redisUtil.deleteData("email_verified:" + email);
+        redisUtil.deleteData("email_auth:" + email);
 
         // 새로운 인증번호 생성
         makeRandomNumber();
+
         String setFrom = "highfourhighfour@gmail.com"; // 발신자 이메일
         String toMail = email;
         String title = "회원 가입 인증 이메일입니다.";
@@ -64,14 +57,34 @@ public class EmailService {
         // 이메일 전송
         mailSend(setFrom, toMail, title, content);
 
-        // 인증번호 및 이메일을 Redis에 저장 (5분간 유지)
-        redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60 * 5L);
-
-        // 이메일 재전송을 제한하기 위해 별도의 키를 생성 (10분 동안 재전송 제한)
-        redisUtil.setDataExpire("email_auth:" + email, "true", 600);
+        // 새로운 인증번호를 "email_auth:<이메일>" 키로 저장하여 기존 코드 무효화 (5분간 유지)
+        redisUtil.setDataExpire("email_auth:" + email, Integer.toString(authNumber), 60 * 5L);
 
         return Integer.toString(authNumber);
     }
+
+    @Transactional
+    public void CheckAuthNum(String email, String authNum) {
+        System.out.println(email + " service " + authNum);
+
+        // Redis에서 이메일에 해당하는 인증 코드 조회
+        String storedAuthNum = redisUtil.getData("email_auth:" + email);
+
+        if (storedAuthNum == null) {
+            throw new ResponseStatusException(MemberExceptionType.AUTH_NUMBER_EXPIRED.httpStatus(),
+                    MemberExceptionType.AUTH_NUMBER_EXPIRED.message());
+        }
+
+        if (!storedAuthNum.equals(authNum)) {
+            throw new ResponseStatusException(MemberExceptionType.FAIL_TO_AUTH.httpStatus(),
+                    MemberExceptionType.FAIL_TO_AUTH.message());
+        }
+
+        // 이메일 인증 완료 여부를 Redis에 저장 (10분 유지)
+        redisUtil.setData("email_verified:" + email, "true", 600);
+    }
+
+
 
     // 이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
@@ -90,24 +103,4 @@ public class EmailService {
         redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60 * 5L);
     }
 
-    @Transactional
-    public void CheckAuthNum(String email, String authNum) {
-        System.out.println(email + " service " + authNum);
-        System.out.println("redis " + redisUtil.getData(authNum));
-
-        // Redis에서 인증번호 확인
-        String storedEmail = redisUtil.getData(authNum);
-        if (storedEmail == null) {
-            throw new ResponseStatusException(MemberExceptionType.AUTH_NUMBER_EXPIRED.httpStatus(),
-                    MemberExceptionType.AUTH_NUMBER_EXPIRED.message());
-        }
-
-        if (!storedEmail.equals(email)) {
-            throw new ResponseStatusException(MemberExceptionType.FAIL_TO_AUTH.httpStatus(),
-                    MemberExceptionType.FAIL_TO_AUTH.message());
-        }
-
-        // 이메일 인증 완료 여부를 Redis에 저장 (10분 유지)
-        redisUtil.setData("email_verified:" + email, "true", 600);
-    }
 }

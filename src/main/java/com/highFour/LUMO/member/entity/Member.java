@@ -50,8 +50,6 @@ public class Member extends BaseTimeEntity {
 
     private String refreshToken;
 
-    private boolean isVerified = false;
-
     private boolean deleted = false;
 
     public void authorizeUser() {
@@ -70,9 +68,6 @@ public class Member extends BaseTimeEntity {
 
     public void updateDeleted(boolean deleted) {
         this.deleted = deleted;
-    }
-    public void updateIsVerified(boolean verified) {
-        this.isVerified = verified;
     }
 
 }
