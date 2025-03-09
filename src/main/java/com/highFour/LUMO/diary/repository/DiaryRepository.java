@@ -13,7 +13,7 @@ import com.highFour.LUMO.diary.entity.DiaryType;
 @Repository
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	// 오늘의 일기 존재여부 확인
-	boolean existsByTypeAndCreatedAtBetween(DiaryType type, LocalDateTime start, LocalDateTime end);
+	boolean existsByMemberIdAndTypeAndCreatedAtBetween(Long memberId, DiaryType type, LocalDateTime start, LocalDateTime end);
 
 	// 타입별 리스트 검색
 	List<Diary> findByType(DiaryType type);
@@ -26,4 +26,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 	// 삭제 후 30일지나면 영구 삭제
 	List<Diary> findByDeletedAtBefore(LocalDateTime threshold);
+
+	//  점수 계산
+	List<Diary> findByMemberIdAndCreatedAtBetween(Long memberId, LocalDateTime startDate, LocalDateTime endDate);
+
 }

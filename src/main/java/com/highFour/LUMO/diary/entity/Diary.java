@@ -2,6 +2,7 @@ package com.highFour.LUMO.diary.entity;
 
 import com.highFour.LUMO.common.domain.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -42,9 +43,13 @@ public class Diary extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private DiaryType type;
 
+	@Column(length = 50)
 	private String title;
 
+	@Column(length = 3000)
 	private String contents;
+
+	private Long rating;
 
 	@Enumerated(EnumType.STRING)
 	private Visibility visibility;
