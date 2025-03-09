@@ -42,21 +42,41 @@ public class EmailService {
     }
 
 
-    //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
     public String joinEmail(String email) {
+        // 이미 인증이 완료된 경우 이메일 전송하지 않음
+        if ("true".equals(redisUtil.getData("email_verified:" + email))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 인증된 이메일입니다.");
+        }
+
+        // 기존 인증번호가 아직 유효하면 재전송하지 않음
+        if (redisUtil.getData("email_auth:" + email) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증번호가 이미 발송되었습니다. 10분 후에 다시 시도하세요.");
+        }
+
+        // 새로운 인증번호 생성
         makeRandomNumber();
-        String setFrom = "yohanhwang10@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String setFrom = "highfourhighfour@gmail.com"; // 발신자 이메일
         String toMail = email;
-        String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
+        String title = "회원 가입 인증 이메일입니다.";
         String content =
-                "LUMO를 방문해주셔서 감사합니다." + 	//html 형식으로 작성 !
+                "LUMO를 방문해주셔서 감사합니다." +
                         "<br><br>" +
-                        "인증 번호는 " + authNumber + "입니다." +
+                        "인증 번호는 <b>" + authNumber + "</b> 입니다." +
                         "<br>" +
-                        "인증됐다 호호호"; //이메일 내용 삽입
+                        "인증이 완료되면 회원가입을 진행할 수 있습니다.";
+
+        // 이메일 전송
         mailSend(setFrom, toMail, title, content);
+
+        // 인증번호 및 이메일을 Redis에 저장 (5분간 유지)
+        redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60 * 5L);
+
+        // 이메일 재전송을 제한하기 위해 별도의 키를 생성 (10분 동안 재전송 제한)
+        redisUtil.setDataExpire("email_auth:" + email, "true", 600);
+
         return Integer.toString(authNumber);
     }
+
 
     //이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
@@ -87,13 +107,8 @@ public class EmailService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다.");
         }
 
-        // 인증이 완료되면 해당 이메일의 계정을 찾아 isVerified 값을 true로 변경
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
-                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+        // 이메일 인증 완료 여부를 Redis에 저장 (10분 유지)
+        redisUtil.setData("email_verified:" + email, "true", 600);
 
-        member.updateIsVerified(true); // isVerified 값 변경
-        // @Transactional 덕분에 변경 사항이 자동 저장됨 (save() 호출 필요 없음)
     }
-
 }

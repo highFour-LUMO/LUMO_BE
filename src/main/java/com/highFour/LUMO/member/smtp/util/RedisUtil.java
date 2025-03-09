@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +17,11 @@ public class RedisUtil {
         ValueOperations<String,String> valueOperations=redisTemplate.opsForValue();
         return valueOperations.get(key);
     }
-    public void setData(String key,String value){//지정된 키(key)에 값을 저장하는 메서드
-        ValueOperations<String,String> valueOperations=redisTemplate.opsForValue();
-        valueOperations.set(key,value);
+    public void setData(String key, String value, long timeoutInSeconds) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(key, value, timeoutInSeconds, TimeUnit.SECONDS);
     }
+
     public void setDataExpire(String key,String value,long duration){//지정된 키(key)에 값을 저장하고, 지정된 시간(duration) 후에 데이터가 만료되도록 설정하는 메서드
         ValueOperations<String,String> valueOperations=redisTemplate.opsForValue();
         Duration expireDuration=Duration.ofSeconds(duration);

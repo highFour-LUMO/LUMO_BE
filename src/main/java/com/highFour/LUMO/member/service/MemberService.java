@@ -8,6 +8,7 @@ import com.highFour.LUMO.member.dto.MemberSignUpReq;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
+import com.highFour.LUMO.member.smtp.util.RedisUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,21 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisUtil redisUtil;
+
 
     public void signUp(MemberSignUpReq memberSignUpReq) {
+        String email = memberSignUpReq.email();
+
+        // 이메일 인증 여부 확인 (Redis에서 조회)
+        String isVerified = redisUtil.getData("email_verified:" + email);
+        if (isVerified == null || !isVerified.equals("true")) {
+            throw new ResponseStatusException(MemberExceptionType.NEED_TO_EMAIL_AUTH.httpStatus(),
+                    MemberExceptionType.NEED_TO_EMAIL_AUTH.message());
+        }
+
         // 이메일 중복 체크
-        if (memberRepository.findByEmail(memberSignUpReq.email()).isPresent()) {
+        if (memberRepository.findByEmail(email).isPresent()) {
             throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(),
                     MemberExceptionType.NOT_A_NEW_MEMBER.message());
         }
@@ -47,15 +59,11 @@ public class MemberService {
                     MemberExceptionType.NOT_A_NEW_NICKNAME.message());
         }
 
-        // 이메일 인증 여부 확인
-        if (!memberSignUpReq.isVerified()) {
-            throw new ResponseStatusException(MemberExceptionType.NEED_TO_EMAIL_AUTH.httpStatus(),
-                    MemberExceptionType.NEED_TO_EMAIL_AUTH.message());
-        }
-
+        // 회원 정보 저장
         Member member = memberSignUpReq.toEntity(passwordEncoder);
         memberRepository.save(member);
     }
+
 
 
 
