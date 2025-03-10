@@ -1,11 +1,11 @@
 package com.highFour.LUMO.common.response;
 
 import com.highFour.LUMO.common.exceptionType.ExceptionType;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
 
 @Getter
 @Builder

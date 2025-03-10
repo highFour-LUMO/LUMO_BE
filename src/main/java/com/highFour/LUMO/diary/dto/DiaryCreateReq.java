@@ -15,7 +15,7 @@ import com.highFour.LUMO.diary.entity.Visibility;
 import lombok.Builder;
 
 @Builder
-public record DiaryCreateReqDto(
+public record DiaryCreateReq(
 	Long memberId,
 	String title,
 	String contents,
@@ -23,18 +23,20 @@ public record DiaryCreateReqDto(
 	List<String> imgUrls,
 	Long emotionId,
 	Long categoryId,
+	Long rating,
 	DiaryType type,
 	Visibility visibility
 ) {
-	public Diary toEntity(Emotion emotion, Category category){
+	public Diary toEntity(Emotion emotion, Category category, Long memberId){
 		return Diary.builder()
-			.memberId(this.memberId)
+			.memberId(memberId)
 			.type(this.type)
 			.title(this.title)
 			.contents(this.contents)
 			.visibility(this.visibility)
 			.emotion(emotion)
 			.category(category)
+			.rating(this.rating)
 			.build();
 	}
 
