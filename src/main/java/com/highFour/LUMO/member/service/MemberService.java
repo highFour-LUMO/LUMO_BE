@@ -4,7 +4,9 @@ package com.highFour.LUMO.member.service;
 
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
+import com.highFour.LUMO.member.dto.MemberInfoRes;
 import com.highFour.LUMO.member.dto.MemberSignUpReq;
+import com.highFour.LUMO.member.dto.MemberUpdateInfoReq;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
@@ -81,20 +83,20 @@ public class MemberService {
         long expiration = jwtService.getAccessTokenExpiration(accessToken);
         if (expiration > 0) {
             redisTemplate.opsForValue().set("blacklist:" + accessToken, "logout", Duration.ofMillis(expiration));
-            log.info("✅ Access Token 블랙리스트 추가 완료 (만료 시간: {}ms)", expiration);
+            log.info(" Access Token 블랙리스트 추가 완료 (만료 시간: {}ms)", expiration);
         } else {
-            log.warn("🚨 Access Token이 이미 만료됨 - 블랙리스트에 저장하지 않음");
+            log.warn(" Access Token이 이미 만료됨 - 블랙리스트에 저장하지 않음");
         }
 
         // Refresh Token 삭제
         if (jwtService.getRefreshTokenFromRedis(email) != null) {
             jwtService.deleteRefreshToken(email);
-            log.info("✅ Refresh Token 삭제 완료: {}", email);
+            log.info(" Refresh Token 삭제 완료: {}", email);
         } else {
-            log.warn("🚨 Refresh Token이 이미 삭제되었거나 없음: {}", email);
+            log.warn(" Refresh Token이 이미 삭제되었거나 없음: {}", email);
         }
 
-        log.info("✅ 로그아웃 성공 - 사용자 이메일: {}", email);
+        log.info(" 로그아웃 성공 - 사용자 이메일: {}", email);
     }
 
 
@@ -111,4 +113,22 @@ public class MemberService {
     }
 
 
+    public MemberInfoRes memberInfo(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        return MemberInfoRes.fromEntity(member);
+    }
+
+    public MemberUpdateInfoReq updateMemberInfo(MemberUpdateInfoReq updateInfo, Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        member.updateNickname(updateInfo.nickname());
+        member.updateProfileUrl(updateInfo.profileImageUrl());
+
+        return MemberUpdateInfoReq.newInfo(member);
+    }
 }

@@ -70,4 +70,11 @@ public class Member extends BaseTimeEntity {
         this.deleted = deleted;
     }
 
+    public void updateNickname(String updateNickname) {
+        this.nickname = updateNickname;
+    }
+    public void updateProfileUrl(String updateProfileUrl) {
+        this.profileUrl = updateProfileUrl;
+    }
+
 }

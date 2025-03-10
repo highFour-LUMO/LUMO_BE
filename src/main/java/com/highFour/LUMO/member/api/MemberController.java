@@ -41,4 +41,17 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/member-info")
+    public ResponseEntity<MemberInfoRes> getMemberInfo(@RequestHeader("myId") Long id){
+        MemberInfoRes memberInfo =  memberService.memberInfo(id);
+        return new ResponseEntity<>(memberInfo, HttpStatus.OK);
+    }
+
+    @PatchMapping("/update-info")
+    public ResponseEntity<?> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq,  @RequestHeader("myId") Long id) {
+        memberService.updateMemberInfo(memberUpdateInfoReq, id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 }
