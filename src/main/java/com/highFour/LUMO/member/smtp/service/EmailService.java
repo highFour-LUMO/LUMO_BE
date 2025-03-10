@@ -7,9 +7,9 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,20 +20,16 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    @Autowired
-    private JavaMailSender mailSender;
+
     private int authNumber;
-    @Autowired
-    private RedisUtil redisUtil;
+
+    private final JavaMailSender mailSender;
+    private final RedisUtil redisUtil;
+    private final PasswordEncoder passwordEncoder;
 
     // 임의의 6자리 양수를 반환합니다.
     public void makeRandomNumber() {
-        Random r = new Random();
-        String randomNumber = "";
-        for (int i = 0; i < 6; i++) {
-            randomNumber += Integer.toString(r.nextInt(10));
-        }
-        authNumber = Integer.parseInt(randomNumber);
+        authNumber = new Random().nextInt(900000) + 100000; // 100000 ~ 999999 범위
     }
 
     public String joinEmail(String email) {
@@ -85,7 +81,6 @@ public class EmailService {
     }
 
 
-
     // 이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
         MimeMessage message = mailSender.createMimeMessage(); // JavaMailSender 객체를 사용하여 MimeMessage 객체를 생성
@@ -101,6 +96,44 @@ public class EmailService {
             e.printStackTrace(); // e.printStackTrace()는 예외를 기본 오류 스트림에 출력하는 메서드
         }
         redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60 * 5L);
+    }
+
+    // 비밀번호 찾기 이메일 인증 코드 발송 코드
+    public String sendPasswordResetEmail(String email) {
+        redisUtil.deleteData("password_reset_auth:" + email);
+        makeRandomNumber();
+
+        String setFrom = "highfourhighfour@gmail.com";
+        String toMail = email;
+        String title = "비밀번호 재설정 인증 이메일입니다.";
+        String content =
+                "비밀번호 재설정을 요청하셨습니다." +
+                        "<br><br>" +
+                        "인증 번호는 <b>" + authNumber + "</b> 입니다." +
+                        "<br>" +
+                        "인증 후 새로운 비밀번호를 설정해주세요.";
+
+        mailSend(setFrom, toMail, title, content);
+        redisUtil.setDataExpire("password_reset_auth:" + email, Integer.toString(authNumber), 60 * 5L);
+
+        return Integer.toString(authNumber);
+    }
+
+    // 사용자가 입력한 인증 번호 확인
+    public void checkPasswordResetAuth(String email, String authNum) {
+        String storedAuthNum = redisUtil.getData("password_reset_auth:" + email); // 저장된 인증 번호 조회
+
+        if (storedAuthNum == null) { // 인증 번호가 만료된 경우
+            throw new ResponseStatusException(MemberExceptionType.AUTH_NUMBER_EXPIRED.httpStatus(),
+                    MemberExceptionType.AUTH_NUMBER_EXPIRED.message());
+        }
+
+        if (!storedAuthNum.equals(authNum)) { // 인증 번호가 일치하지 않는 경우
+            throw new ResponseStatusException(MemberExceptionType.FAIL_TO_AUTH.httpStatus(),
+                    MemberExceptionType.FAIL_TO_AUTH.message());
+        }
+
+        redisUtil.setData("password_reset_verified:" + email, "true", 600); // 인증 성공 시 인증 완료 정보 저장 (10분간 유지)
     }
 
 }

@@ -4,10 +4,7 @@ package com.highFour.LUMO.member.service;
 
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
-import com.highFour.LUMO.member.dto.MemberInfoRes;
-import com.highFour.LUMO.member.dto.MemberPasswordUpdateReq;
-import com.highFour.LUMO.member.dto.MemberSignUpReq;
-import com.highFour.LUMO.member.dto.MemberUpdateInfoReq;
+import com.highFour.LUMO.member.dto.*;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
@@ -16,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -131,7 +129,7 @@ public class MemberService {
         return MemberUpdateInfoReq.newInfo(member);
     }
 
-    @Transactional
+
     public void changePassword(Long id, MemberPasswordUpdateReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
@@ -152,6 +150,29 @@ public class MemberService {
         // 비밀번호 변경
         Member updatedMember = req.updatePassword(member, passwordEncoder);
         memberRepository.save(updatedMember);
+        logout(request);
+    }
+
+    public void resetPassword(Long id, MemberPasswordResetReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+        String email = member.getEmail();
+
+        String verified = redisUtil.getData("password_reset_verified:" + email);
+        if (verified == null || !verified.equals("true")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호 재설정 인증이 완료되지 않았습니다.");
+        }
+
+        // 새 비밀번호 & 확인 비밀번호 일치 검사
+        if (!req.newPassword().equals(req.confirmNewPassword())) {
+            throw new ResponseStatusException(MemberExceptionType.PASSWORD_CONFIRM_MISMATCH.httpStatus(),
+                    MemberExceptionType.PASSWORD_CONFIRM_MISMATCH.message());
+        }
+
+        Member updatedMember = req.resetPassword(member, passwordEncoder);
+        memberRepository.save(updatedMember);
+        redisUtil.deleteData("password_reset_verified:" + email);
         logout(request);
     }
 }

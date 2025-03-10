@@ -59,9 +59,17 @@ public class MemberController {
     }
 
     // 비밀번호 변경 (PATCH /member/password
-    @PatchMapping("/password")
-    public ResponseEntity<String> changePassword(@RequestBody MemberPasswordUpdateReq req, @RequestHeader("myId") Long memberId, HttpServletRequest request) {
-        memberService.changePassword(memberId, req, passwordEncoder, request);
+    @PatchMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody MemberPasswordUpdateReq req, @RequestHeader("myId") Long id, HttpServletRequest request) {
+        memberService.changePassword(id, req, passwordEncoder, request);
         return ResponseEntity.ok("비밀번호 변경 완료");
     }
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody MemberPasswordResetReq req, @RequestHeader("myId") Long id, HttpServletRequest request) {
+        log.info("Received reset-password request for ID: {}", id);
+        memberService.resetPassword(id, req, passwordEncoder, request);
+        return ResponseEntity.ok("비밀번호 리셋 완료");
+    }
+
 }

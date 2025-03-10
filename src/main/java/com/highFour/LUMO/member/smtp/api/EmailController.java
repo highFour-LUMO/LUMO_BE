@@ -34,5 +34,16 @@ public class EmailController {
         return "ok";
     }
 
+    @PostMapping("/sendResetEmail")
+    public String sendResetEmail(@RequestBody @Valid EmailSendReq emailDto) {
+        log.info("비밀번호 재설정 이메일 요청: " + emailDto.email());
+        return emailService.sendPasswordResetEmail(emailDto.email());
+    }
+
+    @PostMapping("/resetAuthCheck")
+    public String resetAuthCheck(@RequestBody @Valid EmailCheckReq emailCheckReq) {
+        emailService.checkPasswordResetAuth(emailCheckReq.email(), emailCheckReq.authNum());
+        return "ok";
+    }
 
 }
