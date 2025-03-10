@@ -19,5 +19,3 @@ public record MemberSignUpReq(String password, String nickname, String email, St
                 .build();
     }
 }
-
-

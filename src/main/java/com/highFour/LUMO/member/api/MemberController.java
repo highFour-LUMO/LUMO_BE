@@ -3,55 +3,58 @@ package com.highFour.LUMO.member.api;
 import com.highFour.LUMO.member.dto.*;
 import com.highFour.LUMO.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @Slf4j
-@RequestMapping("/member")
 @RestController
+@RequestMapping("/member")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
 
+    // 회원 가입 (POST /member/sign-up)
     @PostMapping("/sign-up")
     public ResponseEntity<MemberSignUpReq> signUp(@RequestBody MemberSignUpReq memberSignUpReq) {
         memberService.signUp(memberSignUpReq);
-        return new ResponseEntity<>(memberSignUpReq, HttpStatus.OK);
+        return ResponseEntity.status(201).body(memberSignUpReq);
     }
-
+    // JWT 테스트 (GET /member/jwt-test)
     @GetMapping("/jwt-test")
-    public String jwtTest() {
-        return "jwtTest 요청 성공";
+    public ResponseEntity<String> jwtTest() {
+        return ResponseEntity.ok("jwtTest 요청 성공");
     }
 
-    @PostMapping("/sign-out")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    // 로그아웃 (POST /member/logout)
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
         memberService.logout(request);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/delete")
-    public ResponseEntity<?> deleteMember(@PathVariable Long id, HttpServletRequest request) {
-        memberService.deleteMember(id, request);
-        return new ResponseEntity<>(HttpStatus.OK);
+    // 회원 비활성화 (PATCH /member/{id}/deactivate)
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<Void> deactivateMember(@PathVariable Long id, HttpServletRequest request) {
+        memberService.deactivateMember(id, request);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/member-info")
-    public ResponseEntity<MemberInfoRes> getMemberInfo(@RequestHeader("myId") Long id){
-        MemberInfoRes memberInfo =  memberService.memberInfo(id);
-        return new ResponseEntity<>(memberInfo, HttpStatus.OK);
+    // 회원 정보 조회 (GET /member/{id})
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberInfoRes> getMemberInfo(@PathVariable Long id) {
+        MemberInfoRes memberInfo = memberService.memberInfo(id);
+        return ResponseEntity.ok(memberInfo);
     }
 
-    @PatchMapping("/update-info")
-    public ResponseEntity<?> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq,  @RequestHeader("myId") Long id) {
+    // 회원 정보 수정 (PATCH /member/{id})
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq, @PathVariable Long id) {
         memberService.updateMemberInfo(memberUpdateInfoReq, id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
-
-
 }

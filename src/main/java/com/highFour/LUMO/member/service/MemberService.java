@@ -62,7 +62,6 @@ public class MemberService {
         // 회원 정보 저장
         Member member = memberSignUpReq.toEntity(passwordEncoder);
         memberRepository.save(member);
-        member.authorizeUser();
     }
 
 
@@ -100,12 +99,11 @@ public class MemberService {
     }
 
 
-    public void deleteMember(Long id, HttpServletRequest request) {
+    public void deactivateMember(Long id, HttpServletRequest request) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
-        // 논리적 삭제
         member.updateDeleted(true);
         memberRepository.save(member);
 
