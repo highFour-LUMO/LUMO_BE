@@ -5,6 +5,7 @@ package com.highFour.LUMO.member.service;
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
 import com.highFour.LUMO.member.dto.MemberInfoRes;
+import com.highFour.LUMO.member.dto.MemberPasswordUpdateReq;
 import com.highFour.LUMO.member.dto.MemberSignUpReq;
 import com.highFour.LUMO.member.dto.MemberUpdateInfoReq;
 import com.highFour.LUMO.member.entity.Member;
@@ -128,5 +129,29 @@ public class MemberService {
         member.updateProfileUrl(updateInfo.profileImageUrl());
 
         return MemberUpdateInfoReq.newInfo(member);
+    }
+
+    @Transactional
+    public void changePassword(Long id, MemberPasswordUpdateReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
+                        MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        // 현재 비밀번호 검증
+        if (!passwordEncoder.matches(req.currentPassword(), member.getPassword())) {
+            throw new ResponseStatusException(MemberExceptionType.PASSWORD_MISMATCH.httpStatus(),
+                    MemberExceptionType.PASSWORD_MISMATCH.message());
+        }
+
+        // 새 비밀번호 & 확인 비밀번호 일치 검사
+        if (!req.newPassword().equals(req.confirmNewPassword())) {
+            throw new ResponseStatusException(MemberExceptionType.PASSWORD_CONFIRM_MISMATCH.httpStatus(),
+                    MemberExceptionType.PASSWORD_CONFIRM_MISMATCH.message());
+        }
+
+        // 비밀번호 변경
+        Member updatedMember = req.updatePassword(member, passwordEncoder);
+        memberRepository.save(updatedMember);
+        logout(request);
     }
 }

@@ -16,7 +16,11 @@ public enum MemberExceptionType implements ExceptionType {
     NEED_TO_EMAIL_AUTH(HttpStatus.BAD_REQUEST,"이메일 인증이 필요합니다."),
     EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "이미 인증된 이메일입니다."),
     EMAIL_AUTH_ALREADY_SENT(HttpStatus.BAD_REQUEST, "인증번호가 이미 발송되었습니다. 10분 후에 다시 시도하세요."),
-    AUTH_NUMBER_EXPIRED(HttpStatus.BAD_REQUEST, "인증번호가 만료되었습니다. 새로운 인증번호를 요청하세요.");
+    AUTH_NUMBER_EXPIRED(HttpStatus.BAD_REQUEST, "인증번호가 만료되었습니다. 새로운 인증번호를 요청하세요."),
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다."),
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "새 비밀번호와 확인용 비밀번호가 일치하지 않습니다.");
+
+
 
 
 
