@@ -18,6 +18,7 @@ import com.highFour.LUMO.diary.dto.DiaryCreateReq;
 import com.highFour.LUMO.diary.dto.DiaryDetRes;
 import com.highFour.LUMO.diary.dto.DiaryListRes;
 import com.highFour.LUMO.diary.dto.DiarySearchReq;
+import com.highFour.LUMO.diary.dto.DiaryUpdateReq;
 import com.highFour.LUMO.diary.entity.Category;
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.entity.DiaryHashtagRelation;
@@ -32,6 +33,8 @@ import com.highFour.LUMO.diary.repository.DiaryRepository;
 import com.highFour.LUMO.diary.repository.EmotionRepository;
 import com.highFour.LUMO.diary.repository.HashtagRepository;
 import com.highFour.LUMO.member.repository.MemberRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class DiaryService {
@@ -146,12 +149,14 @@ public class DiaryService {
 	}
 
 	// 일기 삭제 시 임시보관함에 저장
+	@Transactional
 	public void deleteDiary(Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
 
 		// 임시보관함에 저장
 		diary.softDeleteDiary();
+		System.out.println(diary.getDeletedAt());
 	}
 
 	// 임시 보관 30일 이후 영구 삭제
@@ -178,6 +183,43 @@ public class DiaryService {
 		}
 	}
 
+	@Transactional
+	public void updateDiary(DiaryUpdateReq reqDto) {
+		Diary diary = diaryRepository.findById(reqDto.diaryId())
+			.orElseThrow(() -> new BaseCustomException(DIARY_NOT_FOUND));
+
+		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		Long memberId = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
+
+		// 본인의 글이 아닐 경우
+		if (memberId != diary.getMemberId()) {
+			throw new BaseCustomException(UNAUTHORIZED_DIARY_ACCESS);
+		}
+
+		diary.updateTitle(reqDto.title());
+		diary.updateContents(reqDto.contents());
+		diary.updateVisibility(reqDto.visibility());
+
+		// 일기
+		if (diary.getType() == DiaryType.DIARY) {
+			Emotion emotion = emotionRepository.findById(reqDto.emotionId() == null ? diary.getEmotion().getId() : reqDto.emotionId())
+				.orElseThrow(() -> new BaseCustomException(EMOTION_NOT_FOUND));
+			diary.updateEmotion(emotion);
+		}
+
+		// 감정 일기
+		if (diary.getType() == DiaryType.GRATITUDE) {
+			Category category = categoryRepository.findById(reqDto.categoryId() == null ? diary.getCategory().getId() : reqDto.categoryId())
+				.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
+			diary.updateRating(reqDto.rating());
+			diary.updateCategory(category);
+		}
+
+		// 해시태그, 이미지
+		diaryRepository.save(diary);
+	}
+
 	// 주간 평균 점수
 	public Double getWeeklyAvgRating() {
 		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -187,7 +229,7 @@ public class DiaryService {
 		LocalDateTime endDate = LocalDateTime.now();  // 오늘
 		LocalDateTime startDate = endDate.minusDays(7);	// 이전 일주일
 
-		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		List<Diary> diaries = diaryRepository.findByMemberIdAndTypeAndCreatedAtBetween(memberId, DiaryType.GRATITUDE, startDate, endDate);
 		return diaries.stream()
 			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
 			.average()
@@ -203,7 +245,7 @@ public class DiaryService {
 		LocalDateTime endDate = LocalDateTime.now();  // 오늘
 		LocalDateTime startDate = endDate.minusDays(30);	// 이전 일주일
 
-		List<Diary> diaries = diaryRepository.findByMemberIdAndCreatedAtBetween(memberId, startDate, endDate);
+		List<Diary> diaries = diaryRepository.findByMemberIdAndTypeAndCreatedAtBetween(memberId, DiaryType.GRATITUDE, startDate, endDate);
 		return diaries.stream()
 			.mapToLong(diary -> diary.getRating() != null ? diary.getRating() : 0L)  // rating이 null이면 0으로 처리
 			.average()

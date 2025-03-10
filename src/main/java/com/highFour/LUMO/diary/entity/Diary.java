@@ -19,6 +19,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import net.minidev.json.annotate.JsonIgnore;
+
 @Getter
 @Entity
 @NoArgsConstructor
@@ -32,10 +34,12 @@ public class Diary extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "emotion_id")
+	@JsonIgnore
 	private Emotion emotion;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "category_id")
+	@JsonIgnore
 	private Category category;
 
 	private Long memberId;
@@ -56,5 +60,29 @@ public class Diary extends BaseTimeEntity {
 
 	public void softDeleteDiary() {
 		setDeletedAt(LocalDateTime.now());
+	}
+
+	public void updateTitle(String title) {
+		this.title = title;
+	}
+
+	public void updateContents(String contents) {
+		this.contents = contents;
+	}
+
+	public void updateRating(Long rating) {
+		this.rating = rating;
+	}
+
+	public void updateEmotion(Emotion emotion) {
+		this.emotion = emotion;
+	}
+
+	public void updateCategory(Category category) {
+		this.category = category;
+	}
+
+	public void updateVisibility(Visibility visibility) {
+		this.visibility = visibility;
 	}
 }

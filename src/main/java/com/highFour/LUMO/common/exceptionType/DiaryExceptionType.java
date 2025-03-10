@@ -13,7 +13,8 @@ public enum DiaryExceptionType implements ExceptionType {
 	RATING_NOT_FOUND(HttpStatus.NOT_FOUND, "오늘의 점수가 존재하지 않습니다."),
 	INVALID_RATING(HttpStatus.BAD_REQUEST, "오늘의 점수는 1점 ~ 5점에서 선택해주세요."),
 	TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "제목이 너무 깁니다. (최대 50자)"),
-	CONTENTS_TOO_LONG(HttpStatus.BAD_REQUEST, "내용이 너무 깁니다. (최대 3000자)")
+	CONTENTS_TOO_LONG(HttpStatus.BAD_REQUEST, "내용이 너무 깁니다. (최대 3000자)"),
+	UNAUTHORIZED_DIARY_ACCESS(HttpStatus.FORBIDDEN, "본인이 작성한 일기만 수정이 가능합니다."),
 	;
 
 	private final HttpStatus httpStatus;
