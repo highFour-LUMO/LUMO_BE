@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: hkusu/review-assign-action@v1
         with:
-          assignees: ${{ github.actor }} # assign pull request author
-          reviewers: snikuz12, tteia, Windowmincastle
+          assignees: ${{ github.actor }} # assign pull reㄴquest author
+          reviewers: snikuz12, tteia, 34suuuuu
           max-num-of-reviewers: 0
