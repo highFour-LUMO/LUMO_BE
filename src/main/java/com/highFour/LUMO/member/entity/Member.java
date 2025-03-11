@@ -27,7 +27,6 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private String name;
 
     private String password;
@@ -49,15 +48,14 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String refreshToken; // 리프레시 토큰
+    private String refreshToken;
+
+    private boolean deleted = false;
 
     public void authorizeUser() {
         this.role = Role.MEMBER;
     }
 
-    public void updateprofileUrl(String profileUrl){
-        this.profileUrl = profileUrl;
-    }
 
     // 비밀번호 암호화 메소드
     public void passwordEncode(PasswordEncoder passwordEncoder) {
@@ -68,4 +66,17 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = updateRefreshToken;
     }
 
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public void updateNickname(String updateNickname) {
+        this.nickname = updateNickname;
+    }
+    public void updateProfileUrl(String updateProfileUrl) {
+        this.profileUrl = updateProfileUrl;
+    }
+    public void updatePassword(String newPassword, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(newPassword);
+    }
 }

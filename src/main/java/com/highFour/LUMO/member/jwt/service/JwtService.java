@@ -11,8 +11,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 
@@ -45,6 +47,7 @@ public class JwtService {
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
     private static final String BEARER = "Bearer ";
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private final MemberRepository memberRepository;
 
@@ -161,6 +164,36 @@ public class JwtService {
             return true;
         } catch (Exception e) {
             log.error("유효하지 않은 토큰: {}", e.getMessage());
+            throw new BaseCustomException(TokenExceptionType.INVALID_TOKEN);
+        }
+    }
+
+    // Refresh Token을 Redis에 저장 (14일 만료)
+    public void saveRefreshTokenToRedis(String email, String refreshToken) {
+        redisTemplate.opsForValue().set("memberRT:" + email, refreshToken, Duration.ofDays(14));
+        log.info("Redis에 Refresh Token 저장 완료 - email: {}", email);
+    }
+
+    // Redis에서 Refresh Token 가져오기
+    public String getRefreshTokenFromRedis(String email) {
+        return (String) redisTemplate.opsForValue().get("memberRT:" + email);
+    }
+
+    // Redis에서 Refresh Token 삭제 (로그아웃 시)
+    public void deleteRefreshToken(String email) {
+        redisTemplate.delete("memberRT:" + email);
+        log.info("Redis에서 Refresh Token 삭제 완료 - email: {}", email);
+    }
+
+    public long getAccessTokenExpiration(String accessToken) {
+        try {
+            return JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(accessToken)
+                    .getExpiresAt()
+                    .getTime() - System.currentTimeMillis();
+        } catch (Exception e) {
+            log.error("유효하지 않은 Access Token: {}", e.getMessage());
             throw new BaseCustomException(TokenExceptionType.INVALID_TOKEN);
         }
     }
