@@ -46,17 +46,32 @@ public class MemberService {
                     MemberExceptionType.NEED_TO_EMAIL_AUTH.message());
         }
 
-        // 이메일 중복 체크
-        if (memberRepository.findByEmail(email).isPresent()) {
+
+//        if (memberRepository.findByEmail(email).isPresent()) {
+//            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(),
+//                    MemberExceptionType.NOT_A_NEW_MEMBER.message());
+//        }
+//
+//        if (memberRepository.findByNickname(memberSignUpReq.nickname()).isPresent()) {
+//            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_NICKNAME.httpStatus(),
+//                    MemberExceptionType.NOT_A_NEW_NICKNAME.message());
+//        }
+
+        // 중복처리 findByxx 보다 existsByxx 를 사용
+        // 장점
+        // 쿼리 수 감소 → 불필요한 데이터 조회 방지
+        // 빠른 중복 체크 → EXISTS는 조건을 만족하는 행을 찾자마자 종료
+        // DB 부하 감소 → 필요 없는 데이터 조회를 방지
+        if (memberRepository.existsByEmail(email)) {
             throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(),
                     MemberExceptionType.NOT_A_NEW_MEMBER.message());
         }
 
-        // 닉네임 중복 체크
-        if (memberRepository.findByNickname(memberSignUpReq.nickname()).isPresent()) {
+        if (memberRepository.existsByNickname(memberSignUpReq.nickname())) {
             throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_NICKNAME.httpStatus(),
                     MemberExceptionType.NOT_A_NEW_NICKNAME.message());
         }
+
 
         // 회원 정보 저장
         Member member = memberSignUpReq.toEntity(passwordEncoder);

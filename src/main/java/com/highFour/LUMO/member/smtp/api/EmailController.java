@@ -24,7 +24,6 @@ public class EmailController {
 
     @PostMapping("/sendEmail")
     public String mailSend(@RequestBody @Valid EmailSendReq emailDto) {
-        System.out.println("이메일 인증 이메일 :" + emailDto.email());
         return emailService.joinEmail(emailDto.email());
     }
 
