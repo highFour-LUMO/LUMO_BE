@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -32,55 +34,6 @@ public class EmailService {
         authNumber = new Random().nextInt(900000) + 100000; // 100000 ~ 999999 범위
     }
 
-    public String joinEmail(String email) {
-        // 기존 인증 기록 삭제 (이전 인증 무효화)
-        redisUtil.deleteData("email_verified:" + email);
-        redisUtil.deleteData("email_auth:" + email);
-
-        // 새로운 인증번호 생성
-        makeRandomNumber();
-
-        String setFrom = "highfourhighfour@gmail.com"; // 발신자 이메일
-        String toMail = email;
-        String title = "회원 가입 인증 이메일입니다.";
-        String content =
-                "LUMO를 방문해주셔서 감사합니다." +
-                        "<br><br>" +
-                        "인증 번호는 <b>" + authNumber + "</b> 입니다." +
-                        "<br>" +
-                        "인증이 완료되면 회원가입을 진행할 수 있습니다.";
-
-        // 이메일 전송
-        mailSend(setFrom, toMail, title, content);
-
-        // 새로운 인증번호를 "email_auth:<이메일>" 키로 저장하여 기존 코드 무효화 (5분간 유지)
-        redisUtil.setDataExpire("email_auth:" + email, Integer.toString(authNumber), 60 * 5L);
-
-        return Integer.toString(authNumber);
-    }
-
-    @Transactional
-    public void CheckAuthNum(String email, String authNum) {
-        System.out.println(email + " service " + authNum);
-
-        // Redis에서 이메일에 해당하는 인증 코드 조회
-        String storedAuthNum = redisUtil.getData("email_auth:" + email);
-
-        if (storedAuthNum == null) {
-            throw new ResponseStatusException(MemberExceptionType.AUTH_NUMBER_EXPIRED.httpStatus(),
-                    MemberExceptionType.AUTH_NUMBER_EXPIRED.message());
-        }
-
-        if (!storedAuthNum.equals(authNum)) {
-            throw new ResponseStatusException(MemberExceptionType.FAIL_TO_AUTH.httpStatus(),
-                    MemberExceptionType.FAIL_TO_AUTH.message());
-        }
-
-        // 이메일 인증 완료 여부를 Redis에 저장 (10분 유지)
-        redisUtil.setData("email_verified:" + email, "true", 600);
-    }
-
-
     // 이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
         MimeMessage message = mailSender.createMimeMessage(); // JavaMailSender 객체를 사용하여 MimeMessage 객체를 생성
@@ -98,30 +51,73 @@ public class EmailService {
         redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60 * 5L);
     }
 
-    // 비밀번호 찾기 이메일 인증 코드 발송 코드
-    public String sendPasswordResetEmail(String email) {
-        redisUtil.deleteData("password_reset_auth:" + email);
+
+    public String sendAuthEmail(String email, String type) {
+        String emailAuthKey = "email_auth:" + email;
+        String passwordResetAuthKey = "password_reset_auth:" + email;
+
+        // 기존 인증 기록 삭제
+        if (Objects.equals(type, "signUp")) {
+            redisUtil.deleteData("email_verified:" + email);
+            redisUtil.deleteData(emailAuthKey);
+        } else if (Objects.equals(type, "passwordReset")) {
+            redisUtil.deleteData(passwordResetAuthKey);
+        }
+
+        // 새로운 인증번호 생성
         makeRandomNumber();
 
-        String setFrom = "highfourhighfour@gmail.com";
-        String toMail = email;
-        String title = "비밀번호 재설정 인증 이메일입니다.";
-        String content =
-                "비밀번호 재설정을 요청하셨습니다." +
-                        "<br><br>" +
-                        "인증 번호는 <b>" + authNumber + "</b> 입니다." +
-                        "<br>" +
-                        "인증 후 새로운 비밀번호를 설정해주세요.";
+        // 이메일 전송 관련 정보 설정
+        String senderEmail = "highfourhighfour@gmail.com";
+        String subject, content;
 
-        mailSend(setFrom, toMail, title, content);
-        redisUtil.setDataExpire("password_reset_auth:" + email, Integer.toString(authNumber), 60 * 5L);
+        if (Objects.equals(type, "signUp")) {
+            subject = "회원 가입 인증 이메일입니다.";
+            content = "LUMO를 방문해주셔서 감사합니다.<br><br>"
+                    + "인증 번호는 <b>" + authNumber + "</b> 입니다.<br>"
+                    + "인증이 완료되면 회원가입을 진행할 수 있습니다.";
+        } else if (Objects.equals(type, "passwordReset")) {
+            subject = "비밀번호 재설정 인증 이메일입니다.";
+            content = "비밀번호 재설정을 요청하셨습니다.<br><br>"
+                    + "인증 번호는 <b>" + authNumber + "</b> 입니다.<br>"
+                    + "인증 후 새로운 비밀번호를 설정해주세요.";
+        } else {
+            throw new IllegalArgumentException("잘못된 요청 타입입니다.");
+        }
+
+        // 이메일 발송
+        mailSend(senderEmail, email, subject, content);
+
+        // 인증번호 저장 (5분간 유효)
+        long expirationTime = 60 * 5L;
+        if (Objects.equals(type, "signUp")) {
+            redisUtil.setDataExpire(emailAuthKey, Integer.toString(authNumber), expirationTime);
+        } else if (Objects.equals(type, "passwordReset")) {
+            redisUtil.setDataExpire(passwordResetAuthKey, Integer.toString(authNumber), expirationTime);
+        }
 
         return Integer.toString(authNumber);
     }
 
-    // 사용자가 입력한 인증 번호 확인
-    public void checkPasswordResetAuth(String email, String authNum) {
-        String storedAuthNum = redisUtil.getData("password_reset_auth:" + email); // 저장된 인증 번호 조회
+
+
+    public void checkAuthNumber(String email, String authNum, String type) {
+        String authKey;
+        String verifiedKey;
+
+        // 인증 유형에 따라 Redis 키 설정
+        if (Objects.equals(type, "signUp")) {
+            authKey = "email_auth:" + email;
+            verifiedKey = "email_verified:" + email;
+        } else if (Objects.equals(type, "passwordReset")) {
+            authKey = "password_reset_auth:" + email;
+            verifiedKey = "password_reset_verified:" + email;
+        } else {
+            throw new IllegalArgumentException("잘못된 인증 타입입니다.");
+        }
+
+        // Redis에서 저장된 인증 번호 조회
+        String storedAuthNum = redisUtil.getData(authKey);
 
         if (storedAuthNum == null) { // 인증 번호가 만료된 경우
             throw new ResponseStatusException(MemberExceptionType.AUTH_NUMBER_EXPIRED.httpStatus(),
@@ -133,7 +129,9 @@ public class EmailService {
                     MemberExceptionType.FAIL_TO_AUTH.message());
         }
 
-        redisUtil.setData("password_reset_verified:" + email, "true", 600); // 인증 성공 시 인증 완료 정보 저장 (10분간 유지)
+        // 인증 성공 시 해당 이메일을 인증된 상태로 저장 (10분 유지)
+        redisUtil.setData(verifiedKey, "true", 600);
     }
+
 
 }
