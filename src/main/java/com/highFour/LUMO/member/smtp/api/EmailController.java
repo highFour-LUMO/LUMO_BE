@@ -6,6 +6,7 @@ import com.highFour.LUMO.member.smtp.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -25,9 +26,9 @@ public class EmailController {
 
     // 인증 번호 확인 (회원가입 / 비밀번호 재설정)
     @PostMapping("/checkAuthNum")
-    public String checkAuthNum(@RequestBody @Valid EmailCheckReq emailCheckReq, @RequestParam String type) {
+    public ResponseEntity<Void> checkAuthNum(@RequestBody @Valid EmailCheckReq emailCheckReq, @RequestParam String type) {
         log.info("인증 번호 확인 - Type: {}, Email: {}", type, emailCheckReq.email());
         emailService.checkAuthNumber(emailCheckReq.email(), emailCheckReq.authNum(), type);
-        return "ok";
+        return ResponseEntity.ok().build();
     }
 }

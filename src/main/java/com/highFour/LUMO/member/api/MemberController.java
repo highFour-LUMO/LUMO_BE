@@ -32,16 +32,16 @@ public class MemberController {
 
     // 로그아웃 (POST /member/logout)
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletRequest request) {
         memberService.logout(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("로그아웃 !");
     }
 
     // 회원 비활성화 (PATCH /member/{id}/deactivate)
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateMember(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<String> deactivateMember(@PathVariable Long id, HttpServletRequest request) {
         memberService.deactivateMember(id, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("회원 탈퇴 완료");
     }
 
     // 회원 정보 조회 (GET /member/{id})
@@ -53,9 +53,9 @@ public class MemberController {
 
     // 회원 정보 수정 (PATCH /member/{id})
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq, @PathVariable Long id) {
+    public ResponseEntity<String> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq, @PathVariable Long id) {
         memberService.updateMemberInfo(memberUpdateInfoReq, id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("회원 정보 수정 완료");
     }
 
     // 비밀번호 변경 (PATCH /member/password )
