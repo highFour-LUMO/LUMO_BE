@@ -18,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Entity
 @Builder
 @Getter
-@Table(name = "member", indexes = {
-        @Index(name = "idx_member_email", columnList = "email")
-})
+@Table(name = "member")
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
