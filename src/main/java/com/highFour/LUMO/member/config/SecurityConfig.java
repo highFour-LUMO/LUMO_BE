@@ -12,6 +12,7 @@ import com.highFour.LUMO.member.oauth2.handler.OAuth2LoginFailureHandler;
 import com.highFour.LUMO.member.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.highFour.LUMO.member.oauth2.service.CustomOAuth2UserService;
 import com.highFour.LUMO.member.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,13 +53,29 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
-                        .requestMatchers("/member/sign-up","/member/sendEmail","/member/mailauthCheck").permitAll()
+                        .requestMatchers("/member/sign-up", "/member/sendAuthEmail", "/member/checkAuthNum").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                )
+                .formLogin(form -> form.disable())  // 기본 로그인 페이지 비활성화
+                .httpBasic(httpBasic -> httpBasic.disable())  // HTTP Basic 인증 비활성화
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"message\": \"Unauthorized\", \"status\": 401}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"message\": \"Forbidden\", \"status\": 403}");
+                        })
                 );
 
         // 필터 추가 설정

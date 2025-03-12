@@ -11,28 +11,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Builder
-@SQLDelete(sql = "UPDATE member SET deleted_at = now() WHERE id = ?")
-@SQLRestriction("deleted_at is NULL")
 @Getter
+@Table(name = "member")
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
+    private String email;
+
     private String name;
 
     private String password;
 
-    @NotNull
-    private String email;
 
     private String nickname;
 
@@ -50,6 +48,7 @@ public class Member extends BaseTimeEntity {
 
     private String refreshToken;
 
+    @Builder.Default
     private boolean deleted = false;
 
     public void authorizeUser() {

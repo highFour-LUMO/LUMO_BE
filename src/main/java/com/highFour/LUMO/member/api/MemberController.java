@@ -32,16 +32,16 @@ public class MemberController {
 
     // 로그아웃 (POST /member/logout)
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletRequest request) {
         memberService.logout(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("로그아웃 !");
     }
 
     // 회원 비활성화 (PATCH /member/{id}/deactivate)
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateMember(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<String> deactivateMember(@PathVariable Long id, HttpServletRequest request) {
         memberService.deactivateMember(id, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("회원 탈퇴 완료");
     }
 
     // 회원 정보 조회 (GET /member/{id})
@@ -53,18 +53,19 @@ public class MemberController {
 
     // 회원 정보 수정 (PATCH /member/{id})
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq, @PathVariable Long id) {
+    public ResponseEntity<String> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq, @PathVariable Long id) {
         memberService.updateMemberInfo(memberUpdateInfoReq, id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("회원 정보 수정 완료");
     }
 
-    // 비밀번호 변경 (PATCH /member/password
+    // 비밀번호 변경 (PATCH /member/password )
     @PatchMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody MemberPasswordUpdateReq req, @RequestHeader("myId") Long id, HttpServletRequest request) {
         memberService.changePassword(id, req, passwordEncoder, request);
         return ResponseEntity.ok("비밀번호 변경 완료");
     }
 
+    // 비밀번호 찾기(리셋) (PATCH /member/reset-password )
     @PatchMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody MemberPasswordResetReq req, @RequestHeader("myId") Long id, HttpServletRequest request) {
         log.info("Received reset-password request for ID: {}", id);

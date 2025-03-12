@@ -7,12 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -22,28 +17,18 @@ public class EmailController {
 
     private final EmailService emailService;
 
-    @PostMapping("/sendEmail")
-    public String mailSend(@RequestBody @Valid EmailSendReq emailDto) {
-        System.out.println("이메일 인증 이메일 :" + emailDto.email());
-        return emailService.joinEmail(emailDto.email());
+    // 인증 이메일 전송 (회원가입 / 비밀번호 재설정)
+    @PostMapping("/sendAuthEmail")
+    public String sendAuthEmail(@RequestBody @Valid EmailSendReq emailDto, @RequestParam String type) {
+        log.info("인증 이메일 요청 - Type: {}, Email: {}", type, emailDto.email());
+        return emailService.sendAuthEmail(emailDto.email(), type);
     }
 
-    @PostMapping("/mailauthCheck")
-    public String AuthCheck(@RequestBody @Valid EmailCheckReq emailCheckReq) {
-        emailService.CheckAuthNum(emailCheckReq.email(), emailCheckReq.authNum());
-        return "ok";
+    // 인증 번호 확인 (회원가입 / 비밀번호 재설정)
+    @PostMapping("/checkAuthNum")
+    public ResponseEntity<Void> checkAuthNum(@RequestBody @Valid EmailCheckReq emailCheckReq, @RequestParam String type) {
+        log.info("인증 번호 확인 - Type: {}, Email: {}", type, emailCheckReq.email());
+        emailService.checkAuthNumber(emailCheckReq.email(), emailCheckReq.authNum(), type);
+        return ResponseEntity.ok().build();
     }
-
-    @PostMapping("/sendResetEmail")
-    public String sendResetEmail(@RequestBody @Valid EmailSendReq emailDto) {
-        log.info("비밀번호 재설정 이메일 요청: " + emailDto.email());
-        return emailService.sendPasswordResetEmail(emailDto.email());
-    }
-
-    @PostMapping("/resetAuthCheck")
-    public String resetAuthCheck(@RequestBody @Valid EmailCheckReq emailCheckReq) {
-        emailService.checkPasswordResetAuth(emailCheckReq.email(), emailCheckReq.authNum());
-        return "ok";
-    }
-
 }
