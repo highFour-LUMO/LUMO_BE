@@ -48,6 +48,7 @@ public class Member extends BaseTimeEntity {
 
     private String refreshToken;
 
+    @Builder.Default
     private boolean deleted = false;
 
     public void authorizeUser() {
