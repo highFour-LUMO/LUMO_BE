@@ -46,14 +46,14 @@ public class FriendService {
 
     @Transactional
     public void sendFriendRequest(Long senderId, Long receiverId) {
-        // 회원 조회
         Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         Member receiver = memberRepository.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
-        boolean requestExists = friendRequestRepository.existsBySenderAndReceiverOrReceiverAndSender(sender, receiver, receiver, sender);
+        boolean requestExists = friendRequestRepository.existsBySenderAndReceiver(sender, receiver) ||
+                friendRequestRepository.existsBySenderAndReceiver(receiver, sender);
         if (requestExists) {
             throw new EntityNotFoundException(FriendExceptionType.ALREADY_REQUESTED.message());
         }
