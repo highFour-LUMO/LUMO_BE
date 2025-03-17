@@ -1,16 +1,11 @@
 package com.highFour.LUMO.friend.api;
 
-import com.highFour.LUMO.friend.dto.FriendListRes;
 import com.highFour.LUMO.friend.service.FriendService;
-import com.highFour.LUMO.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequestMapping("/friends")
@@ -20,10 +15,19 @@ public class FriendController {
 
     private final FriendService friendService;
 
+    // TODO: 추후 RestAPI 고려해 수정 고려 (전체 메서드 체크)
+
     // 로그인한 회원 자신의 친구 목록 조회
     @GetMapping("/{memberId}")
     public ResponseEntity<?> getFriends(@PathVariable Long memberId){
         return new ResponseEntity<>(friendService.getFriendList(memberId), HttpStatus.OK);
+    }
+
+    // 회원가입한 회원 간 친구 맺기 요청 보내기
+    @PostMapping("/{senderId}/{receiverId}")
+    public ResponseEntity<?> sendFriendRequest(@PathVariable Long senderId, @PathVariable Long receiverId) {
+        friendService.sendFriendRequest(senderId, receiverId);
+        return new ResponseEntity<>("친구 요청이 정상적으로 전송되었습니다", HttpStatus.OK);
     }
 
 }
