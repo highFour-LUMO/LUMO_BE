@@ -34,8 +34,6 @@ import com.highFour.LUMO.diary.repository.EmotionRepository;
 import com.highFour.LUMO.diary.repository.HashtagRepository;
 import com.highFour.LUMO.member.repository.MemberRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class DiaryService {
 	private final EmotionRepository emotionRepository;

@@ -48,6 +48,8 @@ public class Member extends BaseTimeEntity {
 
     private String refreshToken;
 
+    private String fcmToken;
+
     @Builder.Default
     private boolean deleted = false;
 
@@ -55,6 +57,9 @@ public class Member extends BaseTimeEntity {
         this.role = Role.MEMBER;
     }
 
+    public void updateFcmToken(String fcmToken){
+        this.fcmToken = fcmToken;
+    }
 
     // 비밀번호 암호화 메소드
     public void passwordEncode(PasswordEncoder passwordEncoder) {
