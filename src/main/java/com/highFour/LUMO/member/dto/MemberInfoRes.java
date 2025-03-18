@@ -8,8 +8,7 @@ public record MemberInfoRes(
         String profileUrl,
         String point,
         String email,
-        String nickname,
-        String name
+        String nickname
 ) {
     public static MemberInfoRes fromEntity(Member member) {
         return MemberInfoRes.builder()
@@ -17,7 +16,6 @@ public record MemberInfoRes(
                 .point(String.valueOf(member.getPoint()))
                 .email(member.getEmail())
                 .nickname(member.getNickname())
-                .name(member.getName())
                 .build();
     }
 }

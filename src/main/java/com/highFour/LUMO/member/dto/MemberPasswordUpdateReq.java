@@ -14,7 +14,6 @@ public record MemberPasswordUpdateReq(
         return Member.builder()
                 .id(member.getId())
                 .email(member.getEmail())
-                .name(member.getName())
                 .password(passwordEncoder.encode(this.newPassword))
                 .nickname(member.getNickname())
                 .profileUrl(member.getProfileUrl())
