@@ -30,4 +30,18 @@ public class FriendController {
         return new ResponseEntity<>("친구 요청이 정상적으로 전송되었습니다", HttpStatus.OK);
     }
 
+    // 친구 요청 수락
+    @PostMapping("/accept/{senderId}/{receiverId}")
+    public ResponseEntity<String> acceptFriendRequest(@PathVariable Long senderId, @PathVariable Long receiverId) {
+        friendService.acceptFriendRequest(senderId, receiverId);
+        return new ResponseEntity<>("친구 요청을 수락하였습니다.", HttpStatus.OK);
+    }
+
+    // 친구 요청 거절
+    @PostMapping("/reject/{senderId}/{receiverId}")
+    public ResponseEntity<String> rejectFriendRequest(@PathVariable Long senderId, @PathVariable Long receiverId) {
+        friendService.rejectFriendRequest(senderId, receiverId);
+        return new ResponseEntity<>("친구 요청을 거절하였습니다.", HttpStatus.OK);
+    }
+
 }

@@ -28,4 +28,11 @@ public class FriendRequest extends BaseTimeEntity {
     @Column(nullable = false)
     private FriendRequestStatus status;
 
+    public void acceptRequest() {
+        this.status = status.ACCEPTED;
+    }
+
+    public void rejectRequest() {
+        this.status = status.REJECTED;
+    }
 }

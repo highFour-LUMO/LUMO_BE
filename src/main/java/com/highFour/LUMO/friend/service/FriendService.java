@@ -73,4 +73,52 @@ public class FriendService {
         friendRequestRepository.save(friendRequest);
     }
 
+    @Transactional
+    public void acceptFriendRequest(Long senderId, Long receiverId) {
+        Member sender = memberRepository.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        Member receiver = memberRepository.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        // 수락 || 거절은 요청을 받은 사람만 처리할 수 있으므로 sender, receiver 한 번만 조회
+        FriendRequest friendRequest = friendRequestRepository.findBySenderAndReceiver(sender, receiver)
+                .orElseThrow(() -> new EntityNotFoundException(FriendExceptionType.REQUEST_NOT_FOUND.message()));
+
+        if (friendRequest.getStatus() != FriendRequestStatus.PENDING) {
+            throw new IllegalStateException(FriendExceptionType.INVALID_REQUEST_STATUS.message());
+        }
+
+        // 요청 상태를 ACCEPTED로 변경
+        friendRequest.acceptRequest();
+        friendRequestRepository.save(friendRequest);
+
+        Friend friend = Friend.builder()
+                .member1(sender)
+                .member2(receiver)
+                .build();
+        friendRepository.save(friend);
+    }
+
+    @Transactional
+    public void rejectFriendRequest(Long senderId, Long receiverId) {
+        Member sender = memberRepository.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        Member receiver = memberRepository.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        FriendRequest friendRequest = friendRequestRepository.findBySenderAndReceiver(sender, receiver)
+                .orElseThrow(() -> new EntityNotFoundException(FriendExceptionType.REQUEST_NOT_FOUND.message()));
+
+        if (friendRequest.getStatus() != FriendRequestStatus.PENDING) {
+            throw new IllegalStateException(FriendExceptionType.INVALID_REQUEST_STATUS.message());
+        }
+
+        // 요청 상태를 REJECTED로 변경
+        friendRequest.rejectRequest();
+        friendRequestRepository.save(friendRequest);
+    }
+
+
 }
