@@ -7,6 +7,7 @@ import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
 import com.highFour.LUMO.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -148,15 +149,25 @@ public class JwtService {
     /**
      * RefreshToken DB 저장(업데이트)
      */
+    @Transactional
     public void updateRefreshToken(String email, String refreshToken) {
+        log.info(" Refresh Token 업데이트 요청 - email: {}, refreshToken: {}", email, refreshToken);
+
         memberRepository.findByEmail(email)
                 .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
+                        user -> {
+                            log.info(" 기존 회원 정보 조회 완료 - email: {}", email);
+                            user.updateRefreshToken(refreshToken);
+                            memberRepository.save(user);
+                            log.info(" Refresh Token 저장 완료 - email: {}, refreshToken: {}", email, refreshToken);
+                        },
                         () -> {
-                            throw new BaseCustomException(TokenExceptionType.NO_REFRESH_TOKEN);
+                            log.error(" Refresh Token 저장 실패 - 해당 email이 존재하지 않음: {}", email);
                         }
                 );
     }
+
+
 
     public boolean isTokenValid(String token) {
         try {

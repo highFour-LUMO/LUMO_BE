@@ -49,10 +49,11 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     private boolean deleted = false;
 
-    public void authorizeUser() {
-        this.role = Role.MEMBER;
-    }
 
+    public void linkSocialAccount(String socialId, SocialType socialType) {
+        this.socialId = socialId;
+        this.socialType = socialType;
+    }
     public void updateRefreshToken(String updateRefreshToken) {
         this.refreshToken = updateRefreshToken;
     }

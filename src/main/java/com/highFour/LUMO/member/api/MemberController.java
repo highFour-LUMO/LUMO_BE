@@ -24,11 +24,6 @@ public class MemberController {
         memberService.signUp(memberSignUpReq);
         return ResponseEntity.status(201).body(memberSignUpReq);
     }
-    // JWT 테스트 (GET /member/jwt-test)
-    @GetMapping("/jwt-test")
-    public ResponseEntity<String> jwtTest() {
-        return ResponseEntity.ok("jwtTest 요청 성공");
-    }
 
     // 로그아웃 (POST /member/logout)
     @PostMapping("/logout")
@@ -64,7 +59,6 @@ public class MemberController {
         memberService.changePassword(id, req, passwordEncoder, request);
         return ResponseEntity.ok("비밀번호 변경 완료");
     }
-
     // 비밀번호 찾기(리셋) (PATCH /member/reset-password )
     @PatchMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody MemberPasswordResetReq req, @RequestHeader("myId") Long id, HttpServletRequest request) {
