@@ -162,7 +162,7 @@ public class JwtService {
                             log.info(" Refresh Token 저장 완료 - email: {}, refreshToken: {}", email, refreshToken);
                         },
                         () -> {
-                            throw new BaseCustomException(TokenExceptionType.NO_REFRESH_TOKEN);
+                            log.error(" Refresh Token 저장 실패 - 해당 email이 존재하지 않음: {}", email);
                         }
                 );
     }
