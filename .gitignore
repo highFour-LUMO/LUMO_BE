@@ -40,3 +40,6 @@ out/
 
  ###yml ###
 .idea
+
+# fcm 알림
+lumo-e6475-firebase-adminsdk-fbsvc-4a50b93637.json

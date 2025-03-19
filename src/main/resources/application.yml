@@ -76,7 +76,12 @@ cloud:
     s3:
       bucket: lumo-file
 
-
 logging:
   level:
     root: info
+
+fcm:
+  secret-file: ${FCM_SECRET_FILE}
+  key:
+    path: filePath*.json
+    scope: https://www.googleapis.com/auth/firebase.messageing
