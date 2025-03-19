@@ -46,9 +46,14 @@ public class Member extends BaseTimeEntity {
 
     private String refreshToken;
 
+    private String fcmToken;
+
     @Builder.Default
     private boolean deleted = false;
 
+    public void updateFcmToken(String fcmToken){
+        this.fcmToken = fcmToken;
+    }
 
     public void linkSocialAccount(String socialId, SocialType socialType) {
         this.socialId = socialId;
