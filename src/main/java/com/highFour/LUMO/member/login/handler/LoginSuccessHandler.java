@@ -37,7 +37,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         // 삭제된 회원인지 확인
         if (member.isDeleted()) {
-            log.warn("🚨 로그인 시도 실패: 탈퇴한 회원 (이메일: {})", email);
+            log.warn("로그인 시도 실패: 탈퇴한 회원 (이메일: {})", email);
             throw new ResponseStatusException(MemberExceptionType.DELETED_MEMBER.httpStatus(),
                     MemberExceptionType.DELETED_MEMBER.message());
         }
@@ -51,9 +51,9 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         member.updateRefreshToken(refreshToken);
         memberRepository.saveAndFlush(member);
 
-        log.info("✅ 로그인 성공 - 이메일: {}", email);
-        log.info("✅ 발급된 AccessToken: {}", accessToken);
-        log.info("✅ 발급된 AccessToken 만료 기간: {}", accessTokenExpiration);
+        log.info("로그인 성공 - 이메일: {}", email);
+        log.info("발급된 AccessToken: {}", accessToken);
+        log.info("발급된 AccessToken 만료 기간: {}", accessTokenExpiration);
     }
 
 
