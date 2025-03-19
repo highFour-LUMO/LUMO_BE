@@ -46,17 +46,6 @@ public class MemberService {
                     MemberExceptionType.NEED_TO_EMAIL_AUTH.message());
         }
 
-
-//        if (memberRepository.findByEmail(email).isPresent()) {
-//            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_MEMBER.httpStatus(),
-//                    MemberExceptionType.NOT_A_NEW_MEMBER.message());
-//        }
-//
-//        if (memberRepository.findByNickname(memberSignUpReq.nickname()).isPresent()) {
-//            throw new ResponseStatusException(MemberExceptionType.NOT_A_NEW_NICKNAME.httpStatus(),
-//                    MemberExceptionType.NOT_A_NEW_NICKNAME.message());
-//        }
-
         // 중복처리 findByxx 보다 existsByxx 를 사용
         // 장점
         // 쿼리 수 감소 → 불필요한 데이터 조회 방지
