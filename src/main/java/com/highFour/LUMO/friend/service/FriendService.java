@@ -11,9 +11,11 @@ import com.highFour.LUMO.friend.repository.FriendRequestRepository;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,7 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final FriendRequestRepository friendRequestRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FriendListRes> getFriendList(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
@@ -119,6 +121,34 @@ public class FriendService {
         friendRequest.rejectRequest();
         friendRequestRepository.save(friendRequest);
     }
+
+    @Transactional
+    public void unfriend(Long memberId, Long friendId) {
+        Member member1 = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        Member member2 = memberRepository.findById(friendId)
+                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+
+        boolean alreadyFriends = friendRepository.existsByMember1AndMember2(member1, member2) ||
+                friendRepository.existsByMember1AndMember2(member2, member1);
+        if (!alreadyFriends) {
+            throw new EntityNotFoundException(FriendExceptionType.FRIEND_NOT_FOUND.message());
+        }
+
+        boolean requestExists = friendRequestRepository.existsBySenderAndReceiver(member1, member2) ||
+                friendRequestRepository.existsBySenderAndReceiver(member2, member1);
+
+        friendRepository.deleteByMember1AndMember2(member1, member2);
+        friendRepository.deleteByMember1AndMember2(member2, member1);
+
+        if (requestExists) {
+            friendRequestRepository.deleteBySenderAndReceiver(member1, member2);
+            friendRequestRepository.deleteBySenderAndReceiver(member2, member1);
+        }
+    }
+
+
 
 
 }
