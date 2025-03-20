@@ -9,4 +9,5 @@ import java.util.List;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<Friend> findByMember1OrMember2(Member member1, Member member2);
     boolean existsByMember1AndMember2(Member member1, Member member2);
+    void deleteByMember1AndMember2(Member member1, Member member2);
 }

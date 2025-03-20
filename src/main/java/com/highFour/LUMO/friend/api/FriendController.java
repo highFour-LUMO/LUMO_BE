@@ -44,4 +44,10 @@ public class FriendController {
         return new ResponseEntity<>("친구 요청을 거절하였습니다.", HttpStatus.OK);
     }
 
+    @DeleteMapping("/{memberId}/unfriend/{friendId}")
+    public ResponseEntity<String> unfriend(@PathVariable Long memberId, @PathVariable Long friendId) {
+        friendService.unfriend(memberId, friendId);
+        return new ResponseEntity<>("친구가 삭제 되었습니다.", HttpStatus.OK);
+    }
+
 }
