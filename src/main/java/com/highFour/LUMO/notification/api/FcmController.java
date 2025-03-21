@@ -1,5 +1,6 @@
 package com.highFour.LUMO.notification.api;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,15 +21,15 @@ public class FcmController {
 
 	// fcm 토큰 저장
 	@PostMapping("/token")
-	public ResponseEntity<Void> saveFcmToken(@RequestBody FcmTokenSaveRequest fcmTokenSaveRequest) {
+	public ResponseEntity<?> saveFcmToken(@RequestBody FcmTokenSaveRequest fcmTokenSaveRequest) {
 		fcmService.saveFcmToken(fcmTokenSaveRequest);
-		return ResponseEntity.ok(null);
+		return new ResponseEntity<>("fcm token 저장을 성공하였습니다.", HttpStatus.OK);
 	}
 
 	// 테스트용 알림 전송
 	@PostMapping("/notice")
-	public ResponseEntity<Void> sendNotification() {
+	public ResponseEntity<?> sendNotification() {
 		fcmService.sendNotification();
-		return ResponseEntity.ok(null);
+		return new ResponseEntity<>("fcm 알림 전송을 성공하였습니다.", HttpStatus.OK);
 	}
 }

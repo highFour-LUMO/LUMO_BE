@@ -16,7 +16,6 @@ import lombok.Builder;
 
 @Builder
 public record DiaryCreateReq(
-	Long memberId,
 	String title,
 	String contents,
 	List<String> hashtags,
