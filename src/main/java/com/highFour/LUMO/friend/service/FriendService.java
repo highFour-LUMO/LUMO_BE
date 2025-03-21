@@ -1,6 +1,9 @@
 package com.highFour.LUMO.friend.service;
 
+import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.common.exceptionType.FriendExceptionType;
+import static com.highFour.LUMO.common.exceptionType.MemberExceptionType;
+
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.friend.dto.FriendListRes;
 import com.highFour.LUMO.friend.entity.Friend;
@@ -13,6 +16,7 @@ import com.highFour.LUMO.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +32,10 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
 
     @Transactional(readOnly = true)
-    public List<FriendListRes> getFriendList(Long memberId) {
+    public List<FriendListRes> getFriendList() {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long memberId = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -47,7 +54,10 @@ public class FriendService {
     }
 
     @Transactional
-    public void sendFriendRequest(Long senderId, Long receiverId) {
+    public void sendFriendRequest(Long receiverId) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long senderId = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
         Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -76,7 +86,10 @@ public class FriendService {
     }
 
     @Transactional
-    public void acceptFriendRequest(Long senderId, Long receiverId) {
+    public void acceptFriendRequest(Long receiverId) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long senderId = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
         Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -103,7 +116,10 @@ public class FriendService {
     }
 
     @Transactional
-    public void rejectFriendRequest(Long senderId, Long receiverId) {
+    public void rejectFriendRequest(Long receiverId) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long senderId = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
         Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -123,8 +139,11 @@ public class FriendService {
     }
 
     @Transactional
-    public void unfriend(Long memberId, Long friendId) {
-        Member member1 = memberRepository.findById(memberId)
+    public void unfriend(Long friendId) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long member1Id = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
+        Member member1 = memberRepository.findById(member1Id)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         Member member2 = memberRepository.findById(friendId)
