@@ -4,6 +4,7 @@ import com.highFour.LUMO.comment.dto.CommentReq;
 import com.highFour.LUMO.comment.dto.CommentRes;
 import com.highFour.LUMO.comment.entity.Comment;
 import com.highFour.LUMO.comment.repository.CommentRepository;
+import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.common.exceptionType.CommentExceptionType;
 import com.highFour.LUMO.common.exceptionType.DiaryExceptionType;
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
@@ -13,6 +14,7 @@ import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,10 @@ public class CommentService {
 
     @Transactional
     public CommentRes createComment(CommentReq requestDto) {
-        Member member = memberRepository.findById(requestDto.memberId())
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long memberId = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         Diary diary = diaryRepository.findById(requestDto.diaryId())
