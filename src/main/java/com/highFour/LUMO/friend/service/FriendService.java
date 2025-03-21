@@ -2,8 +2,6 @@ package com.highFour.LUMO.friend.service;
 
 import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.common.exceptionType.FriendExceptionType;
-import static com.highFour.LUMO.common.exceptionType.MemberExceptionType;
-
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.friend.dto.FriendListRes;
 import com.highFour.LUMO.friend.entity.Friend;
