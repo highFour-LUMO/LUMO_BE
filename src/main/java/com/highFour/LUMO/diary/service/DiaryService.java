@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,8 @@ import com.highFour.LUMO.diary.repository.HashtagRepository;
 import com.highFour.LUMO.member.repository.MemberRepository;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class DiaryService {
 	private final EmotionRepository emotionRepository;
 	private final CategoryRepository categoryRepository;
@@ -43,19 +46,6 @@ public class DiaryService {
 	private final DiaryRepository diaryRepository;
 	private final DiaryHashtagRelationRepository diaryHashtagRelationRepository;
 	private final MemberRepository memberRepository;
-
-	public DiaryService(EmotionRepository emotionRepository, CategoryRepository categoryRepository,
-		HashtagRepository hashtagRepository,
-		DiaryImgRepository diaryImgRepository, DiaryRepository diaryRepository,
-		DiaryHashtagRelationRepository diaryHashtagRelationRepository, MemberRepository memberRepository) {
-		this.emotionRepository = emotionRepository;
-		this.categoryRepository = categoryRepository;
-		this.hashtagRepository = hashtagRepository;
-		this.diaryImgRepository = diaryImgRepository;
-		this.diaryRepository = diaryRepository;
-		this.diaryHashtagRelationRepository = diaryHashtagRelationRepository;
-		this.memberRepository = memberRepository;
-	}
 
 	// 일기 작성
 	@Transactional
