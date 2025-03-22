@@ -100,7 +100,7 @@ public class EmailService {
 
 
 
-    public void checkAuthNumber(String email, String authNum, String type) {
+    public Boolean checkAuthNumber(String email, String authNum, String type) {
         String authKey;
         String verifiedKey;
 
@@ -130,6 +130,7 @@ public class EmailService {
 
         // 인증 성공 시 해당 이메일을 인증된 상태로 저장 (10분 유지)
         redisUtil.setData(verifiedKey, "true", 600);
+        return true;
     }
 
 

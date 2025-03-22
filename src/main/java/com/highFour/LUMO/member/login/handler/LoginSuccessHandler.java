@@ -2,6 +2,7 @@ package com.highFour.LUMO.member.login.handler;
 
 
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
+import com.highFour.LUMO.member.entity.DelYn;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.jwt.service.JwtService;
 import com.highFour.LUMO.member.repository.MemberRepository;
@@ -36,7 +37,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         // 삭제된 회원인지 확인
-        if (member.isDeleted()) {
+        if (member.getDelYn() == DelYn.Y) {
             log.warn("로그인 시도 실패: 탈퇴한 회원 (이메일: {})", email);
             throw new ResponseStatusException(MemberExceptionType.DELETED_MEMBER.httpStatus(),
                     MemberExceptionType.DELETED_MEMBER.message());
