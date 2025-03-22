@@ -48,8 +48,8 @@ public class Member extends BaseTimeEntity {
 
     private String fcmToken;
 
-    @Builder.Default
-    private boolean deleted = false;
+    @Enumerated(EnumType.STRING)
+    private DelYn delYn = DelYn.N;
 
     public void updateFcmToken(String fcmToken){
         this.fcmToken = fcmToken;
@@ -62,8 +62,8 @@ public class Member extends BaseTimeEntity {
     public void updateRefreshToken(String updateRefreshToken) {
         this.refreshToken = updateRefreshToken;
     }
-    public void updateDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public void updateDeleted() {
+        this.delYn = DelYn.Y;
     }
     public void updateNickname(String updateNickname) {
         this.nickname = updateNickname;
