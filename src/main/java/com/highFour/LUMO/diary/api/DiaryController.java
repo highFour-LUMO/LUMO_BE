@@ -37,7 +37,7 @@ public class DiaryController {
 	@PostMapping("")
 	public ResponseEntity<?> createDiary(@RequestBody DiaryCreateReq reqDto) {
 		Diary diary = diaryService.createDiary(reqDto);
-		return new ResponseEntity<>(diary, HttpStatus.OK);
+		return new ResponseEntity<>("일기/감사 일기 작성이 정상적으로 완료되었습니다.", HttpStatus.OK);
 	}
 
 	// 일기 상세 조회
@@ -58,14 +58,14 @@ public class DiaryController {
 	@DeleteMapping("/{diaryId}")
 	public ResponseEntity<?>  deleteDiary(@PathVariable(name = "diaryId") Long diaryId) {
 		 diaryService.deleteDiary(diaryId);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>("일기/감사 일기가 임시보관함으로 이동되었습니다.", HttpStatus.OK);
 	}
 
 	// 일기 삭제
 	@PatchMapping("")
 	public ResponseEntity<?> updateDiary(@RequestBody DiaryUpdateReq reqDto) {
 		diaryService.updateDiary(reqDto);
-		return new ResponseEntity<>("일기/감사일기 수정 성공", HttpStatus.OK);
+		return new ResponseEntity<>("일기/감사일기 수정이 완료되었습니다.", HttpStatus.OK);
 	}
 
 	// 검색어로 검색
