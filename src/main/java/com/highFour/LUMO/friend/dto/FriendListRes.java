@@ -1,5 +1,6 @@
 package com.highFour.LUMO.friend.dto;
 
+import com.highFour.LUMO.friend.entity.Friend;
 import com.highFour.LUMO.member.entity.Member;
 import lombok.Builder;
 
@@ -17,5 +18,10 @@ public record FriendListRes(
                 .email(member.getEmail())
                 .profileUrl(member.getProfileUrl())
                 .build();
+    }
+
+    public static FriendListRes toEntity(Friend friend, Member member) {
+        Member friendMember = (friend.getMember1().equals(member)) ? friend.getMember2() : friend.getMember1();
+        return fromEntity(friendMember);
     }
 }
