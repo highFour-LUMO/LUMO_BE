@@ -1,5 +1,6 @@
 package com.highFour.LUMO.common;
 
+import com.highFour.LUMO.member.entity.DelYn;
 import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.entity.Role;
 import com.highFour.LUMO.member.repository.MemberRepository;
@@ -65,7 +66,7 @@ public class InitialDataLoader implements CommandLineRunner {
 						.point(0) // 기본 포인트 값 설정
 						.role(Role.MEMBER) // 기본 역할 설정
 						.refreshToken(null)
-						.deleted(false)
+						.delYn(DelYn.N)
 						.build()
 		};
 

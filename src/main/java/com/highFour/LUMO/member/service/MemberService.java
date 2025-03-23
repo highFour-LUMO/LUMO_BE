@@ -1,7 +1,5 @@
 package com.highFour.LUMO.member.service;
 
-
-
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.common.exceptionType.TokenExceptionType;
 import com.highFour.LUMO.member.dto.*;
@@ -14,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +33,7 @@ public class MemberService {
     private final JwtService jwtService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisUtil redisUtil;
+
 
 
     public void signUp(MemberSignUpReq memberSignUpReq) {
@@ -102,28 +102,31 @@ public class MemberService {
     }
 
 
-    public void deactivateMember(Long id, HttpServletRequest request) {
-        Member member = memberRepository.findById(id)
+    public void deactivateMember(HttpServletRequest request) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
-        member.updateDeleted(true);
+        member.updateDeleted();
         memberRepository.save(member);
 
         logout(request);
     }
 
 
-    public MemberInfoRes memberInfo(Long id) {
-        Member member = memberRepository.findById(id)
+    public MemberInfoRes memberInfo() {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         return MemberInfoRes.fromEntity(member);
     }
 
-    public MemberUpdateInfoReq updateMemberInfo(MemberUpdateInfoReq updateInfo, Long id) {
-        Member member = memberRepository.findById(id)
+    public MemberUpdateInfoReq updateMemberInfo(MemberUpdateInfoReq updateInfo) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -134,8 +137,9 @@ public class MemberService {
     }
 
 
-    public void changePassword(Long id, MemberPasswordUpdateReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
-        Member member = memberRepository.findById(id)
+    public void changePassword(MemberPasswordUpdateReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
@@ -157,8 +161,9 @@ public class MemberService {
         logout(request);
     }
 
-    public void resetPassword(Long id, MemberPasswordResetReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
-        Member member = memberRepository.findById(id)
+    public void resetPassword(MemberPasswordResetReq req, PasswordEncoder passwordEncoder, HttpServletRequest request) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new ResponseStatusException(MemberExceptionType.MEMBER_NOT_FOUND.httpStatus(),
                         MemberExceptionType.MEMBER_NOT_FOUND.message()));
         String email = member.getEmail();
