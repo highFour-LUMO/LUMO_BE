@@ -23,21 +23,21 @@ public class MemberController {
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody MemberSignUpReq memberSignUpReq) {
         memberService.signUp(memberSignUpReq);
-        return new ResponseEntity<>(memberSignUpReq, HttpStatus.OK);
+        return new ResponseEntity<>("회원가입이 완료되었습니다.", HttpStatus.OK);
     }
 
     // 로그아웃 (POST /member/logout)
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         memberService.logout(request);
-        return new ResponseEntity<>(request,HttpStatus.OK);
+        return new ResponseEntity<>("로그아웃이 되었습니다.",HttpStatus.OK);
     }
 
     // 회원 비활성화 (PATCH /member/deactivate)
     @PatchMapping("/deactivate")
     public ResponseEntity<?> deactivateMember(HttpServletRequest request) {
         memberService.deactivateMember(request);
-        return new ResponseEntity<>(request,HttpStatus.OK);
+        return new ResponseEntity<>("회원탈퇴가 완료되었습니다.",HttpStatus.OK);
     }
 
     // 회원 정보 조회 (GET /member)
@@ -49,20 +49,21 @@ public class MemberController {
     // 회원 정보 수정 (PATCH /member)
     @PatchMapping("")
     public ResponseEntity<?> updateInfo(@RequestBody MemberUpdateInfoReq memberUpdateInfoReq) {
-        return new ResponseEntity<>(memberService.updateMemberInfo(memberUpdateInfoReq),HttpStatus.OK);
+        memberService.updateMemberInfo(memberUpdateInfoReq);
+        return new ResponseEntity<>("회원 정보 수정이 완료되었습니다.",HttpStatus.OK);
     }
 
     // 비밀번호 변경 (PATCH /member/password )
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody MemberPasswordUpdateReq req, HttpServletRequest request) {
         memberService.changePassword(req, passwordEncoder, request);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("비밀번호가 변경되었습니다.",HttpStatus.OK);
     }
     // 비밀번호 찾기(리셋) (PATCH /member/reset-password )
     @PatchMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody MemberPasswordResetReq req,HttpServletRequest request) {
         memberService.resetPassword(req, passwordEncoder, request);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("비밀번호로 변경되었습니다.",HttpStatus.OK);
     }
 
 }
