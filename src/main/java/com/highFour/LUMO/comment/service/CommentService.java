@@ -55,4 +55,23 @@ public class CommentService {
 
         return CommentRes.fromEntity(comment);
     }
+
+    @Transactional
+    public CommentRes updateComment(Long commentId, String newContent) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(CommentExceptionType.COMMENT_NOT_FOUND.message()));
+
+        if (!comment.getMember().getId().equals(member.getId())) {
+            throw new BaseCustomException(CommentExceptionType.UNAUTHORIZED_COMMENT_EDIT);
+        }
+
+        comment.updateContent(newContent);
+
+        return CommentRes.fromEntity(comment);
+    }
+
 }

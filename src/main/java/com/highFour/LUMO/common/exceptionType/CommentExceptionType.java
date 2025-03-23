@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CommentExceptionType implements ExceptionType {
 
-    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
+    UNAUTHORIZED_COMMENT_EDIT(HttpStatus.UNAUTHORIZED, "댓글 작성자만 수정할 수 있습니다.");
 
 
 
