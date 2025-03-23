@@ -32,4 +32,8 @@ public class Comment extends BaseTimeEntity {
     @Column(length = 150, nullable = false)
     private String content;
 
+    public void updateContent(String newContent) {
+        this.content = newContent;
+    }
+
 }
