@@ -28,29 +28,23 @@ public class CommentService {
     private final DiaryRepository diaryRepository;
 
     @Transactional
-    public CommentRes createComment(CommentReq requestDto) {
+    public CommentRes createComment(CommentReq commentReq) {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long memberId = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
-        Diary diary = diaryRepository.findById(requestDto.diaryId())
+        Diary diary = diaryRepository.findById(commentReq.diaryId())
                 .orElseThrow(() -> new EntityNotFoundException(DiaryExceptionType.DIARY_NOT_FOUND.message()));
 
         Comment parentComment = null;
-        if (requestDto.parentCommentId() != null) {
-            parentComment = commentRepository.findById(requestDto.parentCommentId())
+        if (commentReq.parentCommentId() != null) {
+            parentComment = commentRepository.findById(commentReq.parentCommentId())
                     .orElseThrow(() -> new EntityNotFoundException(CommentExceptionType.COMMENT_NOT_FOUND.message()));
         }
 
-        // 댓글 저장
-        Comment comment = Comment.builder()
-                .member(member)
-                .diary(diary)
-                .parentComment(parentComment)
-                .content(requestDto.content())
-                .build();
+        Comment comment = commentReq.toEntity(member, diary, parentComment);
         commentRepository.save(comment);
 
         return CommentRes.fromEntity(comment);
