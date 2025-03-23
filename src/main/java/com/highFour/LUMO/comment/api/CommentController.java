@@ -18,8 +18,8 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentRes> createComment(@RequestBody CommentReq requestDto) {
-        CommentRes commentRes = commentService.createComment(requestDto);
+    public ResponseEntity<CommentRes> createComment(@RequestBody CommentReq commentReq) {
+        CommentRes commentRes = commentService.createComment(commentReq);
         return new ResponseEntity<>(commentRes, HttpStatus.OK);
     }
 
@@ -27,7 +27,7 @@ public class CommentController {
     public ResponseEntity<CommentRes> updateComment(@PathVariable Long commentId, @RequestBody Map<String, String> requestBody) {
         String newContent = requestBody.get("content");
         CommentRes updatedComment = commentService.updateComment(commentId, newContent);
-        return ResponseEntity.ok(updatedComment);
+        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
     }
 
 
