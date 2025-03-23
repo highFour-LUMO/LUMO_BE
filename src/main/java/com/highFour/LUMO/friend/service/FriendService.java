@@ -4,6 +4,8 @@ import com.highFour.LUMO.common.exception.BaseCustomException;
 import com.highFour.LUMO.common.exceptionType.FriendExceptionType;
 import com.highFour.LUMO.common.exceptionType.MemberExceptionType;
 import com.highFour.LUMO.friend.dto.FriendListRes;
+import com.highFour.LUMO.friend.dto.FriendReq;
+import com.highFour.LUMO.friend.dto.FriendRequestReq;
 import com.highFour.LUMO.friend.entity.Friend;
 import com.highFour.LUMO.friend.entity.FriendRequest;
 import com.highFour.LUMO.friend.entity.FriendRequestStatus;
@@ -44,22 +46,17 @@ public class FriendService {
         }
 
         return friends.stream()
-                .map(friend -> {
-                    Member friendMember = (friend.getMember1().equals(member)) ? friend.getMember2() : friend.getMember1();
-                    return FriendListRes.fromEntity(friendMember);
-                })
+                .map(friend -> FriendListRes.toEntity(friend, member))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void sendFriendRequest(Long receiverId) {
+    public void sendFriendRequest(FriendRequestReq requestDto) {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long senderId = memberRepository.findByEmail(memberEmail)
-                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND)).getId();
-        Member sender = memberRepository.findById(senderId)
-                .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
+        Member sender = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND));
 
-        Member receiver = memberRepository.findById(receiverId)
+        Member receiver = memberRepository.findById(requestDto.receiverId())
                 .orElseThrow(() -> new EntityNotFoundException(MemberExceptionType.MEMBER_NOT_FOUND.message()));
 
         boolean requestExists = friendRequestRepository.existsBySenderAndReceiver(sender, receiver) ||
@@ -74,12 +71,7 @@ public class FriendService {
             throw new EntityNotFoundException(FriendExceptionType.ALREADY_FRIENDS.message());
         }
 
-        FriendRequest friendRequest = FriendRequest.builder()
-                .sender(sender)
-                .receiver(receiver)
-                .status(FriendRequestStatus.PENDING)
-                .build();
-
+        FriendRequest friendRequest = requestDto.toEntity(sender, receiver);
         friendRequestRepository.save(friendRequest);
     }
 
@@ -106,10 +98,8 @@ public class FriendService {
         friendRequest.acceptRequest();
         friendRequestRepository.save(friendRequest);
 
-        Friend friend = Friend.builder()
-                .member1(sender)
-                .member2(receiver)
-                .build();
+        FriendReq friendReq = new FriendReq(sender.getId(), receiver.getId());
+        Friend friend = friendReq.toEntity(sender, receiver);
         friendRepository.save(friend);
     }
 
