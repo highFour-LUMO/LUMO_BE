@@ -156,9 +156,8 @@ public class DiaryService {
 		diaryRepository.deleteAll(expiredDiaries);
 	}
 
-
+	// 오늘의 일기가 이미 존재하는지 확인
 	public void isExistDiary(DiaryCreateReq req, Long memberId){
-		// 오늘의 일기가 이미 존재하는지 확인
 		LocalDate today = LocalDate.now();
 		LocalDateTime startOfDay = today.atStartOfDay();
 		LocalDateTime endOfDay = today.atTime(23, 59, 59);
@@ -196,7 +195,7 @@ public class DiaryService {
 			diary.updateEmotion(emotion);
 		}
 
-		// 감정 일기
+		// 감사 일기
 		if (diary.getType() == DiaryType.GRATITUDE) {
 			Category category = categoryRepository.findById(reqDto.categoryId() == null ? diary.getCategory().getId() : reqDto.categoryId())
 				.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
@@ -208,7 +207,7 @@ public class DiaryService {
 		diaryRepository.save(diary);
 	}
 
-	// 주간 평균 점수
+	// 주간 평균 점수 계산
 	public Double getWeeklyAvgRating() {
 		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 		Long memberId = memberRepository.findByEmail(memberEmail)
@@ -224,7 +223,7 @@ public class DiaryService {
 			.orElse(0.0);
 	}
 
-	// 월간 평균 점수
+	// 월간 평균 점수 계산
 	public Double getMonthlyAvgRating() {
 		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 		Long memberId = memberRepository.findByEmail(memberEmail)
