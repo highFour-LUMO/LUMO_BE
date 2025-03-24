@@ -42,6 +42,10 @@ public class CommentService {
         if (commentReq.parentCommentId() != null) {
             parentComment = commentRepository.findById(commentReq.parentCommentId())
                     .orElseThrow(() -> new EntityNotFoundException(CommentExceptionType.COMMENT_NOT_FOUND.message()));
+
+            if (parentComment.isDeleted()) {
+                throw new BaseCustomException(CommentExceptionType.PARENT_COMMENT_DELETED);
+            }
         }
 
         Comment comment = commentReq.toEntity(member, diary, parentComment);
@@ -66,6 +70,22 @@ public class CommentService {
         comment.updateContent(newContent);
 
         return CommentRes.fromEntity(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new BaseCustomException(MemberExceptionType.MEMBER_NOT_FOUND));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(CommentExceptionType.COMMENT_NOT_FOUND.message()));
+
+        if (!comment.getMember().getId().equals(member.getId())) {
+            throw new BaseCustomException(CommentExceptionType.UNAUTHORIZED_COMMENT_DELETE);
+        }
+
+        comment.updateDeleted();
     }
 
 }
