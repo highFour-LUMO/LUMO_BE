@@ -2,6 +2,7 @@ package com.highFour.LUMO.comment.entity;
 
 import com.highFour.LUMO.common.domain.BaseTimeEntity;
 import com.highFour.LUMO.diary.entity.Diary;
+import com.highFour.LUMO.member.entity.DelYn;
 import com.highFour.LUMO.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,18 @@ public class Comment extends BaseTimeEntity {
 
     public void updateContent(String newContent) {
         this.content = newContent;
+    }
+
+    @Enumerated(EnumType.STRING)
+    @JoinColumn(name = "del_yn", nullable = false)
+    private DelYn delYn = DelYn.N;
+
+    public void updateDeleted() {
+        this.delYn = DelYn.Y;
+    }
+
+    public boolean isDeleted() {
+        return this.delYn == DelYn.Y;
     }
 
 }
