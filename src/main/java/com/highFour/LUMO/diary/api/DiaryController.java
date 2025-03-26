@@ -48,7 +48,7 @@ public class DiaryController {
 
 	// 	일기 목록 조회
 	@GetMapping("")
-	public ResponseEntity<?> getDiaryListByType(@RequestParam DiaryType type) {
+	public ResponseEntity<?> getDiaryListByType(@RequestParam(required=false) DiaryType type) {
 		List<DiaryListRes> diaryList = diaryService.getDiaryList(type);
 		return new ResponseEntity<>(diaryList, HttpStatus.OK);
 	}

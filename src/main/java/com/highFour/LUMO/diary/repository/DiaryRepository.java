@@ -19,6 +19,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	// 타입별 리스트 검색
 	List<Diary> findByMemberAndType(Member member, DiaryType type);
 
+	// 사용자별 전체 리스트 조회
+	List<Diary> findAllByMember(Member member);
+
 	// 타입별 제목에서 검색
 	List<Diary> findByTypeAndTitleContainingIgnoreCase(DiaryType type, String title);
 

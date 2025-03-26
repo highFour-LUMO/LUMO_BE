@@ -121,7 +121,13 @@ public class DiaryService {
 		Member member = memberRepository.findByEmail(memberEmail)
 			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND));
 
-		List<Diary> diaryList = diaryRepository.findByMemberAndType(member, type);
+		List<Diary> diaryList = null;
+		if (type == null) {
+			diaryList = diaryRepository.findAllByMember(member);
+		}else{
+			diaryList = diaryRepository.findByMemberAndType(member, type);
+		}
+
 		return diaryList.stream()
 			.map(DiaryListRes::fromEntity)
 			.collect(Collectors.toList());
