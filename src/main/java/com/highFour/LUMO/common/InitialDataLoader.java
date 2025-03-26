@@ -67,7 +67,19 @@ public class InitialDataLoader implements CommandLineRunner {
 						.role(Role.MEMBER) // 기본 역할 설정
 						.refreshToken(null)
 						.delYn(DelYn.N)
-						.build()
+						.build(),
+				Member.builder()
+					.email("testtest@test.com")
+					.password(passwordEncoder.encode("testtesttest"))
+					.nickname("testtest")
+					.socialType(null)  // 소셜 타입 없음
+					.socialId(null)
+					.profileUrl("")
+					.point(0) // 기본 포인트 값 설정
+					.role(Role.MEMBER) // 기본 역할 설정
+					.refreshToken(null)
+					.delYn(DelYn.N)
+					.build()
 		};
 
 		for (Member member : members) {
