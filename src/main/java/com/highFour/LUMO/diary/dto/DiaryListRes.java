@@ -9,7 +9,7 @@ import lombok.Builder;
 public record DiaryListRes(
 	String title,
 	String contents,
-	String member,
+	String nickname,
 	String emotion,
 	String category,
 	Visibility visibility
@@ -20,7 +20,7 @@ public record DiaryListRes(
 		return DiaryListRes.builder()
 			.title(diary.getTitle())
 			.contents(diary.getContents())
-			.member(null)
+			.nickname(diary.getMember().getNickname())
 			.emotion(diary.getEmotion().getLabel())
 			.category(diary.getCategory().getLabel())
 			.visibility(diary.getVisibility())

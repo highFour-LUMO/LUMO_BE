@@ -11,6 +11,7 @@ import com.highFour.LUMO.diary.entity.DiaryType;
 import com.highFour.LUMO.diary.entity.Emotion;
 import com.highFour.LUMO.diary.entity.Hashtag;
 import com.highFour.LUMO.diary.entity.Visibility;
+import com.highFour.LUMO.member.entity.Member;
 
 import lombok.Builder;
 
@@ -26,9 +27,9 @@ public record DiaryCreateReq(
 	DiaryType type,
 	Visibility visibility
 ) {
-	public Diary toEntity(Emotion emotion, Category category, Long memberId){
+	public Diary toEntity(Emotion emotion, Category category, Member member){
 		return Diary.builder()
-			.memberId(memberId)
+			.member(member)
 			.type(this.type)
 			.title(this.title)
 			.contents(this.contents)

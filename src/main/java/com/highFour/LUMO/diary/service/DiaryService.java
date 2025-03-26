@@ -33,6 +33,7 @@ import com.highFour.LUMO.diary.repository.DiaryImgRepository;
 import com.highFour.LUMO.diary.repository.DiaryRepository;
 import com.highFour.LUMO.diary.repository.EmotionRepository;
 import com.highFour.LUMO.diary.repository.HashtagRepository;
+import com.highFour.LUMO.member.entity.Member;
 import com.highFour.LUMO.member.repository.MemberRepository;
 
 @Service
@@ -53,8 +54,8 @@ public class DiaryService {
 		// 입력 null에 대한 예외 처리 필요
 		// 로그인한 사용자로만 일기 조회 처리 필요
 		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-		Long memberId = memberRepository.findByEmail(memberEmail)
-			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
+		Member member = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND));
 
 		// 제목이 50자 이상인 경우
 		if (req.title().length() > 50) {
@@ -71,7 +72,7 @@ public class DiaryService {
 			throw new BaseCustomException(RATING_NOT_FOUND);
 		}
 
-		isExistDiary(req, memberId);
+		isExistDiary(req, member.getId());
 
 		// 일기 or 감사일기에 따른 감정, 카테고리 저장
 		Emotion emotion = emotionRepository.findById(req.type() == DiaryType.DIARY ? req.emotionId() : 1L)
@@ -79,7 +80,7 @@ public class DiaryService {
 		Category category = categoryRepository.findById(req.type() == DiaryType.GRATITUDE ? req.categoryId() : 1L)
 			.orElseThrow(() -> new BaseCustomException(CATEGORY_NOT_FOUND));
 
-		Diary diary = req.toEntity(emotion, category, memberId);
+		Diary diary = req.toEntity(emotion, category, member);
 		diaryRepository.save(diary);
 
 		List<Hashtag> hashtags = toHashtags(req.hashtags());
@@ -116,7 +117,11 @@ public class DiaryService {
 
 	// 일기 목록 조회
 	public List<DiaryListRes> getDiaryList(DiaryType type) {
-		List<Diary> diaryList = diaryRepository.findByType(type);
+		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		Member member = memberRepository.findByEmail(memberEmail)
+			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND));
+
+		List<Diary> diaryList = diaryRepository.findByMemberAndType(member, type);
 		return diaryList.stream()
 			.map(DiaryListRes::fromEntity)
 			.collect(Collectors.toList());
@@ -180,7 +185,7 @@ public class DiaryService {
 			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND)).getId();
 
 		// 본인의 글이 아닐 경우
-		if (memberId != diary.getMemberId()) {
+		if (memberId != diary.getMember().getId()) {
 			throw new BaseCustomException(UNAUTHORIZED_DIARY_ACCESS);
 		}
 

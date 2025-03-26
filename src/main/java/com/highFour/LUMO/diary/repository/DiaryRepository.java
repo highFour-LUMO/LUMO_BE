@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.highFour.LUMO.diary.entity.Diary;
 import com.highFour.LUMO.diary.entity.DiaryType;
+import com.highFour.LUMO.member.entity.Member;
 
 @Repository
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
@@ -16,7 +17,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	boolean existsByMemberIdAndTypeAndCreatedAtBetween(Long memberId, DiaryType type, LocalDateTime start, LocalDateTime end);
 
 	// 타입별 리스트 검색
-	List<Diary> findByType(DiaryType type);
+	List<Diary> findByMemberAndType(Member member, DiaryType type);
 
 	// 타입별 제목에서 검색
 	List<Diary> findByTypeAndTitleContainingIgnoreCase(DiaryType type, String title);

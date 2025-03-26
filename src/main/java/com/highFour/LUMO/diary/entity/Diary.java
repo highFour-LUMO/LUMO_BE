@@ -1,6 +1,7 @@
 package com.highFour.LUMO.diary.entity;
 
 import com.highFour.LUMO.common.domain.BaseTimeEntity;
+import com.highFour.LUMO.member.entity.Member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,7 +43,10 @@ public class Diary extends BaseTimeEntity {
 	@JsonIgnore
 	private Category category;
 
-	private Long memberId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id")
+	@JsonIgnore
+	private Member member;
 
 	@Enumerated(EnumType.STRING)
 	private DiaryType type;

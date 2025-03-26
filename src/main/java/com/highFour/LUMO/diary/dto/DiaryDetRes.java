@@ -13,7 +13,7 @@ import lombok.Builder;
 public record DiaryDetRes(
 	String title,
 	String contents,
-	String member,
+	String nickname,
 	String emotion,
 	String category,
 	Long rating,
@@ -24,10 +24,11 @@ public record DiaryDetRes(
 		return DiaryDetRes.builder()
 			.title(diary.getTitle())
 			.contents(diary.getContents())
-			.member(null)
+			.nickname(diary.getMember().getNickname())
 			.emotion(diary.getEmotion().getLabel())
 			.category(diary.getCategory().getLabel())
 			.rating(diary.getRating())
+			.visibility(diary.getVisibility())
 			.imgUrls(imgUrls)
 			.build();
 	}
