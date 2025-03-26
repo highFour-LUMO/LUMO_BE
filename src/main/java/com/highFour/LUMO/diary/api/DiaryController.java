@@ -1,7 +1,9 @@
 package com.highFour.LUMO.diary.api;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,8 +50,8 @@ public class DiaryController {
 
 	// 	일기 목록 조회
 	@GetMapping("")
-	public ResponseEntity<?> getDiaryListByType(@RequestParam(required=false) DiaryType type) {
-		List<DiaryListRes> diaryList = diaryService.getDiaryList(type);
+	public ResponseEntity<?> getDiaryListByType(@RequestParam(required=false) DiaryType type, @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		Page<DiaryListRes> diaryList = diaryService.getDiaryList(type, pageable);
 		return new ResponseEntity<>(diaryList, HttpStatus.OK);
 	}
 
@@ -69,8 +71,8 @@ public class DiaryController {
 
 	// 검색어로 검색
 	@GetMapping("/search")
-	public ResponseEntity<?>  searchByKeyword(@RequestBody DiarySearchReq dto) {
-		List<DiaryListRes> diaryList = diaryService.searchByKeyword(dto);
+	public ResponseEntity<?>  searchByKeyword(@RequestBody DiarySearchReq dto, @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		Page<DiaryListRes> diaryList = diaryService.searchByKeyword(dto, pageable);
 		return new ResponseEntity<>(diaryList, HttpStatus.OK);
 	}
 

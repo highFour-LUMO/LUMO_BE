@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,16 +19,16 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	boolean existsByMemberIdAndTypeAndCreatedAtBetween(Long memberId, DiaryType type, LocalDateTime start, LocalDateTime end);
 
 	// 타입별 리스트 검색
-	List<Diary> findByMemberAndType(Member member, DiaryType type);
+	Page<Diary> findByMemberAndType(Member member, DiaryType type, Pageable pageable);
 
 	// 사용자별 전체 리스트 조회
-	List<Diary> findAllByMember(Member member);
+	Page<Diary> findAllByMember(Member member, Pageable pageable);
 
 	// 타입별 제목에서 검색
-	List<Diary> findByTypeAndTitleContainingIgnoreCase(DiaryType type, String title);
+	Page<Diary> findByTypeAndTitleContainingIgnoreCase(DiaryType type, String title, Pageable pageable);
 
 	// 타입별 본문에서 검색
-	List<Diary> findByTypeAndContentsContainingIgnoreCase(DiaryType type, String title);
+	Page<Diary> findByTypeAndContentsContainingIgnoreCase(DiaryType type, String title, Pageable pageable);
 
 	// 삭제 후 30일지나면 영구 삭제
 	List<Diary> findByDeletedAtBefore(LocalDateTime threshold);

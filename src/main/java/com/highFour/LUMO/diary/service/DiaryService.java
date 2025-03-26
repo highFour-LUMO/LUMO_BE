@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -116,35 +119,31 @@ public class DiaryService {
 	}
 
 	// 일기 목록 조회
-	public List<DiaryListRes> getDiaryList(DiaryType type) {
+	public Page<DiaryListRes> getDiaryList(DiaryType type,Pageable pageable) {
 		String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 		Member member = memberRepository.findByEmail(memberEmail)
 			.orElseThrow(() -> new BaseCustomException(MEMBER_NOT_FOUND));
 
-		List<Diary> diaryList = null;
+		Page<Diary> diaryList = null;
 		if (type == null) {
-			diaryList = diaryRepository.findAllByMember(member);
+			diaryList = diaryRepository.findAllByMember(member, pageable);
 		}else{
-			diaryList = diaryRepository.findByMemberAndType(member, type);
+			diaryList = diaryRepository.findByMemberAndType(member, type, pageable);
 		}
 
-		return diaryList.stream()
-			.map(DiaryListRes::fromEntity)
-			.collect(Collectors.toList());
+		return diaryList.map(DiaryListRes::fromEntity);
 	}
 
-	// 제목에서 검색
-	public List<DiaryListRes> searchByKeyword(DiarySearchReq req) {
-		List<Diary> diaryList = null;
+	// 제목/ 내용에서 검색
+	public Page<DiaryListRes> searchByKeyword(DiarySearchReq req, Pageable pageable) {
+		Page<Diary> diaryList = null;
 
 		if (req.searchType().equals("제목")) {
-			diaryList = diaryRepository.findByTypeAndTitleContainingIgnoreCase(req.type(), req.keyword());
+			diaryList = diaryRepository.findByTypeAndTitleContainingIgnoreCase(req.type(), req.keyword(), pageable);
 		}else if (req.searchType().equals("내용")) {
-			diaryList = diaryRepository.findByTypeAndContentsContainingIgnoreCase(req.type(), req.keyword());
+			diaryList = diaryRepository.findByTypeAndContentsContainingIgnoreCase(req.type(), req.keyword(), pageable);
 		}
-		return diaryList.stream()
-			.map(DiaryListRes::fromEntity)
-			.collect(Collectors.toList());
+		return diaryList.map(DiaryListRes::fromEntity);
 	}
 
 	// 일기 삭제 시 임시보관함에 저장
